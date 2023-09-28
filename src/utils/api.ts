@@ -16,42 +16,6 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
-/** A set of type-safe react-query hooks for your tRPC API. */
-export const api = createTRPCNext<AppRouter>({
-  config() {
-    return {
-      /**
-       * Transformer used for data de-serialization from the server.
-       *
-       * @see https://trpc.io/docs/data-transformers
-       */
-      transformer: superjson,
-
-      /**
-       * Links used to determine request flow from client to server.
-       *
-       * @see https://trpc.io/docs/links
-       */
-      links: [
-        loggerLink({
-          enabled: (opts) =>
-            process.env.NODE_ENV === "development" ||
-            (opts.direction === "down" && opts.result instanceof Error),
-        }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-      ],
-    };
-  },
-  /**
-   * Whether tRPC should await queries when server rendering pages.
-   *
-   * @see https://trpc.io/docs/nextjs#ssr-boolean-default-false
-   */
-  ssr: false,
-});
-
 /**
  * Inference helper for inputs.
  *
@@ -65,3 +29,81 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  * @example type HelloOutput = RouterOutputs['example']['hello']
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
+
+export const api = createTRPCNext<AppRouter>({
+  config(opts) {
+    const { ctx } = opts;
+    if (typeof window !== "undefined") {
+      // during client requests
+      return {
+        transformer: superjson, // optional - adds superjson serialization
+        links: [
+          httpBatchLink({
+            url: "/api/trpc",
+          }),
+        ],
+      };
+    }
+    return {
+      transformer: superjson, // optional - adds superjson serialization
+      links: [
+        httpBatchLink({
+          // The server needs to know your app's full url
+          url: `${getBaseUrl()}/api/trpc`,
+          /**
+           * Set custom request headers on every request from tRPC
+           * @link https://trpc.io/docs/v10/header
+           */
+          headers() {
+            if (!ctx?.req?.headers) {
+              return {};
+            }
+            // To use SSR properly, you need to forward client headers to the server
+            // This is so you can pass through things like cookies when we're server-side rendering
+            return {
+              cookie: "",
+            };
+          },
+        }),
+      ],
+    };
+  },
+  ssr: true,
+});
+
+// /** A set of type-safe react-query hooks for your tRPC API. */
+// export const api = createTRPCNext<AppRouter>({
+//   config() {
+//     return {
+//       /**
+//        * Transformer used for data de-serialization from the server.
+//        *
+//        * @see https://trpc.io/docs/data-transformers
+//        */
+//       transformer: superjson,
+
+//       /**
+//        * Links used to determine request flow from client to server.
+//        *
+//        * @see https://trpc.io/docs/links
+//        */
+//       links: [
+//         loggerLink({
+//           enabled: (opts) =>
+//             process.env.NODE_ENV === "development" ||
+//             (opts.direction === "down" && opts.result instanceof Error),
+//         }),
+//         httpBatchLink({
+//           url: `${getBaseUrl()}/api/trpc`,
+//         }),
+//       ],
+//     };
+//   },
+//   /**
+//    * Whether tRPC should await queries when server rendering pages.
+//    *
+//    * @see https://trpc.io/docs/nextjs#ssr-boolean-default-false
+//    */
+//   // ssr: false,
+//   ssr: true,
+// });
