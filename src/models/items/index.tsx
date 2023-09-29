@@ -36,6 +36,7 @@ export const ItemSchemaValid = z.object({
     }),
   price: z
     .number()
+    .min(0, "price must be greater than or equal to 0")
     .refine((data) => !isNaN(data), { message: "price is a required field" }),
   imageUrl: z.string().optional().default("https://placehold.co/400"),
 });

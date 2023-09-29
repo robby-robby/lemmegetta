@@ -1,18 +1,11 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 
 import { useState } from "react";
 import { BsCheckCircle } from "react-icons/bs";
 import { FiAlertTriangle } from "react-icons/fi";
-import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { useFocus } from "~/hooks/useFocus";
 import { Spinner } from "./Spinner";
-
-export const SaveStatus = Object.freeze({
-  loading: "loading",
-  success: "success",
-  error: "error",
-  idle: "idle",
-});
+import { TRPCStatus } from "../utils/TRPCStatus";
 
 export const SaveState = {
   open: true,
@@ -20,7 +13,7 @@ export const SaveState = {
 };
 export type SaveStates = (typeof SaveState)[keyof typeof SaveState];
 
-export type SaveStatusType = (typeof SaveStatus)[keyof typeof SaveStatus];
+export type SaveStatusType = (typeof TRPCStatus)[keyof typeof TRPCStatus];
 
 const AlertIcon = () => (
   <div className="flex justify-center">
@@ -51,7 +44,7 @@ export const useSaveModal = (): {
   setState: (state: SaveStates) => void;
 } => {
   const [state, setState] = useState<SaveStates>(false);
-  const [status, onStatusChange] = useState<SaveStatusType>(SaveStatus.idle);
+  const [status, onStatusChange] = useState<SaveStatusType>(TRPCStatus.idle);
   const close = () => {
     setState(SaveState.close);
   };
@@ -75,15 +68,15 @@ export const SaveModal: React.FC<Props> = ({
   status,
   stickyOpen = true,
 }) => {
-  const color = status === SaveStatus.success ? "green" : "red";
+  const color = status === TRPCStatus.success ? "green" : "red";
   const [inputRef, setInputFocus] = useFocus();
   const onClose = () => {
-    if (status !== SaveStatus.loading || !stickyOpen) {
+    if (status !== TRPCStatus.loading || !stickyOpen) {
       close();
     }
   };
   useEffect(() => {
-    if (status !== SaveStatus.loading) {
+    if (status !== TRPCStatus.loading) {
       setInputFocus();
     }
   }, [status]);
@@ -120,20 +113,20 @@ export const SaveModal: React.FC<Props> = ({
               <span className="sr-only">Close modal</span>
             </button>
             <div className="p-6 text-center">
-              {status === SaveStatus.success ? <CheckIcon /> : null}
-              {status === SaveStatus.error ? <AlertIcon /> : null}
-              {status === SaveStatus.loading ? <Spinner /> : null}
+              {status === TRPCStatus.success ? <CheckIcon /> : null}
+              {status === TRPCStatus.error ? <AlertIcon /> : null}
+              {status === TRPCStatus.loading ? <Spinner /> : null}
               <h3 className="mb-5 text-lg font-normal text-gray-500">
-                {status === SaveStatus.success ? "Changes Saved" : null}
-                {status === SaveStatus.error ? "Error updating :(" : null}
-                {status === SaveStatus.loading ? "Loading..." : null}
+                {status === TRPCStatus.success ? "Changes Saved" : null}
+                {status === TRPCStatus.error ? "Error updating :(" : null}
+                {status === TRPCStatus.loading ? "Loading..." : null}
               </h3>
               <button
                 data-modal-hide="popup-modal"
                 type="button"
                 onClick={onClose}
                 ref={inputRef}
-                disabled={status === SaveStatus.loading}
+                disabled={status === TRPCStatus.loading}
                 className={`rounded-lg border border-${color}-500 bg-${color}-500 px-5 py-2.5 text-sm font-medium text-white
   hover:bg-${color}-600 hover:text-white focus:z-10 focus:outline-none focus:ring-4 focus:ring-${color}-500 disabled:border-none disabled:bg-gray-400`}
               >

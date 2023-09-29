@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { api } from "~/utils/api";
 import { type PaymentCards, PaymentCardsDefault } from "~/models/cards";
 import { type SaveStatusType } from "~/components/SaveModal";
+import { TRPCStatus } from "~/utils/TRPCStatus";
 import { type PaymentPropSetter } from "~/components/PaymentCard";
 
 export function usePaymentCardsRPC({
@@ -35,7 +36,8 @@ export function usePaymentCardsRPC({
   };
 
   useEffect(() => {
-    if (paymentsQuery.status === "success") {
+    if (paymentsQuery.status === TRPCStatus.success) {
+      //TODO dont hardcode string use save type
       if (paymentsQuery.data !== undefined) setCards(paymentsQuery.data);
     }
   }, [paymentsQuery.data, paymentsQuery.status]);

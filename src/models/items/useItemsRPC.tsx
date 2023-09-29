@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import { type ItemType } from "~/models/items";
-import { SaveStatus, type SaveStatusType } from "~/components/SaveModal";
+import { type SaveStatusType } from "~/components/SaveModal";
+import { TRPCStatus } from "~/utils/TRPCStatus";
 
-export function useItemsRPC(
-  onSuccess: (i: ItemType) => void,
-  onFailure: (e: Error) => void,
-  onStatusChange: (status: SaveStatusType) => void
-) {
+export function useItemsRPC(onStatusChange: (status: SaveStatusType) => void) {
   const [items, setItems] = useState<ItemType[]>([]);
   const itemsQuery = api.menuItems.getAll.useQuery();
   const itemsMuCreate = api.menuItems.create.useMutation();
@@ -15,16 +12,20 @@ export function useItemsRPC(
   const itemsMuDelete = api.menuItems.delete.useMutation();
 
   useEffect(() => {
-    if (itemsQuery.status === SaveStatus.success) {
+    if (itemsQuery.status === TRPCStatus.success) {
       setItems(itemsQuery.data);
     }
   }, [itemsQuery.data, itemsQuery.status]);
 
   useEffect(() => {
-    if (itemsMuCreate.status === SaveStatus.success) {
+    if (
+      itemsMuCreate.status === TRPCStatus.success ||
+      itemsMuUpdate.status === TRPCStatus.success ||
+      itemsMuDelete.status === TRPCStatus.success
+    ) {
       void itemsQuery.refetch();
     }
-  }, [itemsQuery.refetch, itemsMuCreate.status]);
+  }, [itemsMuCreate.status, itemsMuUpdate.status, itemsMuDelete.status]);
 
   useEffect(() => {
     onStatusChange(itemsMuCreate.status);
@@ -51,22 +52,6 @@ export function useItemsRPC(
     return itemsMuUpdate.mutateAsync(item);
   };
 
-  // const createAsync = async (item: ItemType) => {
-  //   try {
-  //     await itemsMuCreate.mutateAsync(item);
-  //     onSuccess(item);
-  //   } catch (e) {
-  //     onFailure(e as Error);
-  //   }
-  // };
-  // const updateAsync = async (item: ItemType) => {
-  //   try {
-  //     await itemsMuUpdate.mutateAsync(item);
-  //     onSuccess(item);
-  //   } catch (e) {
-  //     onFailure(e as Error);
-  //   }
-  // };
   return {
     items,
     createAsync,

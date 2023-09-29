@@ -2,10 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { type ReactElement, useState } from "react";
 import { FiTrash2, FiEdit2, FiEye } from "react-icons/fi";
-import ItemModal, {
-  // ItemModalState,
-  useItemModal,
-} from "~/components/ItemModal";
+import { ItemModal, useItemModal } from "~/components/ItemModal";
 import AdminLayout from "~/components/AdminLayout";
 
 import { NullItem, type ItemType } from "~/models/items";
@@ -13,6 +10,7 @@ import { SaveModal, useSaveModal } from "~/components/SaveModal";
 import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { useItemsRPC } from "~/models/items/useItemsRPC";
 import { useItemEditor } from "~/models/items/useItemEditor";
+import { isZodError, ZodErrorObject } from "~/utils/misc";
 
 function MenuPage() {
   const {
@@ -22,73 +20,68 @@ function MenuPage() {
     status: saveModalStatus,
     onStatusChange,
   } = useSaveModal();
-  const {
-    open: itemModalOpen,
-    close: itemModalClose,
-    state: itemModalState,
-  } = useItemModal();
+
+  const { open: addOpen, close: addClose, state: addState } = useItemModal();
+  const { open: editOpen, close: editClose, state: editState } = useItemModal();
 
   const [addItem, setAddItem] = useState({ ...NullItem });
+  const addItemReset = () => setAddItem({ ...NullItem });
 
-  const onSuccess = (i: ItemType) => {
-    saveModalOpen();
-    itemModalClose();
-    setAddItem({ ...NullItem });
-  };
   const onFailure = (e: Error) => {
     console.error(e);
     throw e;
   };
-  const { items, remove, create, update, createAsync, updateAsync, refetch } =
-    useItemsRPC(onSuccess, onFailure, onStatusChange);
+  const { items, remove, createAsync, updateAsync } =
+    useItemsRPC(onStatusChange);
+
   const { editItem, editItemById } = useItemEditor(items);
 
-  const { open: editOpen, close: editClose, state: editState } = useItemModal();
-
-  // const onSubmit = (item: ItemType) => {
-  //   create(item);
-  //   saveModalOpen();
-  //   itemModalClose();
-  //   setAddItem({ ...NullItem });
-  // };
+  const { zodErrors, zodErrorsSet, zodErrorsReset } = useZodErrors();
 
   const onSubmitCreate = async (item: ItemType) => {
     try {
       await createAsync(item);
       saveModalOpen();
-      itemModalClose();
+      addClose();
       setAddItem({ ...NullItem });
-    } catch (e) {
-      console.log(JSON.stringify(e.data.zodError));
-      onFailure(e as Error);
+    } catch (error) {
+      if (isZodError(error)) {
+        return zodErrorsSet(error.data.zodError);
+      }
+      //ELSE TODO WTF OMG!
+      // throw error
+      addClose();
+      saveModalOpen();
     }
   };
+
   const onSubmitEdit = async (item: ItemType) => {
     try {
       await updateAsync(item);
       editClose();
-      await refetch(); //??
     } catch (e) {
       onFailure(e as Error);
     }
   };
   useEscapeModal(editClose);
 
+  const openAddItem = () => {
+    zodErrorsReset();
+    addItemReset();
+    addOpen();
+  };
+
   const openEditItem = (itemId: string) => {
+    zodErrorsReset();
     editItemById(itemId);
     editOpen();
   };
-  // const editSave = (item: ItemType) => {
-  //   editClose();
-  //   update(item);
-  //   return refetch();
-  // };
 
-  const removeAndUpdate = async (id: ItemType["id"]) => {
-    remove(id);
-    await refetch();
-    console.log(items.length);
-  };
+  // const removeAndUpdate = async (id: ItemType["id"]) => {
+  //   remove(id);
+  //   // const r = await refetch();
+  //   // console.log(items.length, r);
+  // };
 
   return (
     <>
@@ -105,17 +98,13 @@ function MenuPage() {
             <div className="mb-3 flex justify-end">
               <button
                 className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                onClick={itemModalOpen}
+                onClick={openAddItem}
               >
                 Add +
               </button>
             </div>
             <div className="-mx-4 flex flex-wrap">
-              <ItemsGrid
-                items={items}
-                edit={openEditItem}
-                remove={removeAndUpdate}
-              />
+              <ItemsGrid items={items} edit={openEditItem} remove={remove} />
             </div>
           </div>
         </div>
@@ -125,19 +114,35 @@ function MenuPage() {
           onClose={editClose}
           onSubmit={onSubmitEdit}
           defaultItem={editItem}
+          zodErrors={zodErrors}
         />
         <ItemModal
           title="Add Item"
-          show={itemModalState}
-          onClose={itemModalClose}
+          show={addState}
+          onClose={addClose}
           onSubmit={onSubmitCreate}
           defaultItem={addItem}
+          zodErrors={zodErrors}
         />
       </div>
     </>
   );
 }
 
+function useZodErrors() {
+  const [zodErrors, zodErrorsSet] = useState<ZodErrorObject>({
+    formErrors: [],
+    fieldErrors: {},
+  });
+  const zodErrorsReset = () =>
+    zodErrorsSet({ formErrors: [], fieldErrors: {} });
+
+  return {
+    zodErrors,
+    zodErrorsSet,
+    zodErrorsReset,
+  };
+}
 function ItemsGrid({
   items,
   edit,
