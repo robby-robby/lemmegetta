@@ -46,7 +46,7 @@ export const menuItemsRouter = createTRPCRouter({
         id: z.string(),
       })
     )
-    .query(({ input, ctx }) => {
+    .mutation(({ input, ctx }) => {
       return ctx.prisma.menuItems.delete({
         where: { id: input.id },
       });

@@ -24,6 +24,108 @@ export function useItemModal() {
   return { open, close, state: showModal };
 }
 
+function useHasErrors(errors: object) {
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("errors:", errors);
+    }
+  }, [errors]);
+}
+
+const ItemModalForm = ({
+  fileChange,
+  inputChange,
+  item,
+  close,
+  submit,
+  error,
+}: {
+  fileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  inputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  close: () => void;
+  submit: (i: ItemType) => void;
+  item: ItemType;
+}) => (
+  <div className="mt-5">
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-600">Name</label>
+      <input
+        type="text"
+        name="name"
+        value={item.name}
+        onChange={inputChange}
+        required
+        className="mt-1 w-full rounded-md border p-2"
+      />
+    </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-600">
+        Description
+      </label>
+      <input
+        type="text"
+        name="description"
+        value={item.description}
+        onChange={inputChange}
+        required
+        className="mt-1 w-full rounded-md border p-2"
+      />
+    </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-600">
+        Short Code
+      </label>
+      <input
+        type="text"
+        name="shortCode"
+        value={item.shortCode}
+        onChange={inputChange}
+        required
+        className="mt-1 w-full rounded-md border p-2"
+      />
+    </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-600">Price</label>
+      <input
+        type="number"
+        step="0.01"
+        name="price"
+        value={item.price}
+        onChange={inputChange}
+        required
+        className="mt-1 w-full rounded-md border p-2"
+      />
+    </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-600">Image</label>
+      <input
+        type="file"
+        name="image"
+        value={item.imageUrl}
+        onChange={fileChange}
+        className="mt-1 w-full rounded-md border p-2"
+      />
+    </div>
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={close}
+        className="mr-2 rounded bg-gray-400 px-4 py-2 font-bold text-white hover:bg-gray-500"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onClick={() => submit(item)}
+        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+);
+
 const ItemModal: React.FC<Props> = ({
   show,
   onClose,
@@ -37,11 +139,11 @@ const ItemModal: React.FC<Props> = ({
     setItemFormData(defaultItem);
   }, [defaultItem]);
 
-  const handleSubmit = () => {
+  const submit = () => {
     return onSubmit(itemFormData);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setItemFormData((prevData) => ({
       ...prevData,
@@ -49,7 +151,7 @@ const ItemModal: React.FC<Props> = ({
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Handle file upload logic here
@@ -85,90 +187,13 @@ const ItemModal: React.FC<Props> = ({
                 >
                   {title}
                 </h3>
-                <div className="mt-5">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={itemFormData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1 w-full rounded-md border p-2"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      name="description"
-                      value={itemFormData.description}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1 w-full rounded-md border p-2"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600">
-                      Short Code
-                    </label>
-                    <input
-                      type="text"
-                      name="shortCode"
-                      value={itemFormData.shortCode}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1 w-full rounded-md border p-2"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600">
-                      Price
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="price"
-                      value={itemFormData.price}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1 w-full rounded-md border p-2"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-600">
-                      Image
-                    </label>
-                    <input
-                      type="file"
-                      name="image"
-                      value={itemFormData.imageUrl}
-                      onChange={handleFileChange}
-                      className="mt-1 w-full rounded-md border p-2"
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="mr-2 rounded bg-gray-400 px-4 py-2 font-bold text-white hover:bg-gray-500"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                      onClick={handleSubmit}
-                      className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </div>
+                <ItemModalForm
+                  close={onClose}
+                  submit={submit}
+                  fileChange={fileChange}
+                  item={itemFormData}
+                  inputChange={inputChange}
+                />
               </div>
             </div>
           </div>

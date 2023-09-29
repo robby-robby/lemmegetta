@@ -9,12 +9,7 @@ import ItemModal, {
 import AdminLayout from "~/components/AdminLayout";
 
 import { NullItem, type ItemType } from "~/models/items";
-import {
-  SaveModal,
-  SaveStatus,
-  type SaveStatusType,
-  useSaveModal,
-} from "~/components/SaveModal";
+import { SaveModal, useSaveModal } from "~/components/SaveModal";
 import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { useItemsRPC } from "~/models/items/useItemsRPC";
 import { useItemEditor } from "~/models/items/useItemEditor";
@@ -44,25 +39,55 @@ function MenuPage() {
     console.error(e);
     throw e;
   };
-  const { items, create, update, refetch } = useItemsRPC(
-    onSuccess,
-    onFailure,
-    onStatusChange
-  );
+  const { items, remove, create, update, createAsync, updateAsync, refetch } =
+    useItemsRPC(onSuccess, onFailure, onStatusChange);
   const { editItem, editItemById } = useItemEditor(items);
 
   const { open: editOpen, close: editClose, state: editState } = useItemModal();
 
+  // const onSubmit = (item: ItemType) => {
+  //   create(item);
+  //   saveModalOpen();
+  //   itemModalClose();
+  //   setAddItem({ ...NullItem });
+  // };
+
+  const onSubmitCreate = async (item: ItemType) => {
+    try {
+      await createAsync(item);
+      saveModalOpen();
+      itemModalClose();
+      setAddItem({ ...NullItem });
+    } catch (e) {
+      console.log(JSON.stringify(e.data.zodError));
+      onFailure(e as Error);
+    }
+  };
+  const onSubmitEdit = async (item: ItemType) => {
+    try {
+      await updateAsync(item);
+      editClose();
+      await refetch(); //??
+    } catch (e) {
+      onFailure(e as Error);
+    }
+  };
   useEscapeModal(editClose);
 
   const openEditItem = (itemId: string) => {
     editItemById(itemId);
     editOpen();
   };
-  const editSave = async (item: ItemType) => {
-    editClose();
-    await update(item);
-    return refetch();
+  // const editSave = (item: ItemType) => {
+  //   editClose();
+  //   update(item);
+  //   return refetch();
+  // };
+
+  const removeAndUpdate = async (id: ItemType["id"]) => {
+    remove(id);
+    await refetch();
+    console.log(items.length);
   };
 
   return (
@@ -86,7 +111,11 @@ function MenuPage() {
               </button>
             </div>
             <div className="-mx-4 flex flex-wrap">
-              <ItemsGrid items={items} openEditItem={openEditItem} />
+              <ItemsGrid
+                items={items}
+                edit={openEditItem}
+                remove={removeAndUpdate}
+              />
             </div>
           </div>
         </div>
@@ -94,14 +123,14 @@ function MenuPage() {
           title="Edit Item"
           show={editState}
           onClose={editClose}
-          onSubmit={editSave}
+          onSubmit={onSubmitEdit}
           defaultItem={editItem}
         />
         <ItemModal
           title="Add Item"
           show={itemModalState}
           onClose={itemModalClose}
-          onSubmit={create}
+          onSubmit={onSubmitCreate}
           defaultItem={addItem}
         />
       </div>
@@ -111,10 +140,12 @@ function MenuPage() {
 
 function ItemsGrid({
   items,
-  openEditItem,
+  edit,
+  remove,
 }: {
   items: ItemType[];
-  openEditItem: (id: string) => void;
+  edit: (id: string) => void;
+  remove: (id: string) => void;
 }): ReactElement {
   if (!items || items?.length === 0) {
     return (
@@ -128,7 +159,7 @@ function ItemsGrid({
   return (
     <>
       {items.map((item) => (
-        <Item key={item.id} item={item} edit={openEditItem} />
+        <Item key={item.id} item={item} remove={remove} edit={edit} />
       ))}
     </>
   );
@@ -137,9 +168,11 @@ function ItemsGrid({
 function Item({
   item,
   edit,
+  remove,
 }: {
   item: ItemType;
   edit: (id: string) => void;
+  remove: (id: string) => void;
 }): ReactElement {
   return (
     <div className="mb-4 w-full px-4 md:w-1/2 lg:w-1/4" key={item.id}>
@@ -164,7 +197,10 @@ function Item({
           >
             <FiEdit2 />
           </button>
-          <button className="mx-1 rounded-lg bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700">
+          <button
+            onClick={() => remove(item.id)}
+            className="mx-1 rounded-lg bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700"
+          >
             <FiTrash2 />
           </button>
           <button className="mx-1 rounded-lg bg-blue-300 px-4 py-2 font-bold text-white hover:bg-blue-400">

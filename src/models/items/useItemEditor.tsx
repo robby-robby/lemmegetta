@@ -15,9 +15,12 @@ export function useItemEditor(items: ItemType[]) {
       setEditItem(i ?? NullItem);
     }
   }, [editItemId, items]);
-
   const editItemById = (id: string) => {
     setEditItemId(id);
   };
-  return { editItem, editItemById: editItemById, setEditItem };
+  const editItemReset = () => {
+    setEditItemId("");
+    setEditItem(NullItem);
+  };
+  return { editItem, editItemById: editItemById, setEditItem, editItemReset };
 }

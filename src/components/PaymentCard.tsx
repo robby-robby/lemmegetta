@@ -35,6 +35,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
             Username
             <input
               type="text"
+              name="username"
               className="w-full rounded border border-black  p-2"
               value={username}
               onChange={(e) =>
@@ -49,6 +50,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
             URL Template
             <input
               type="text"
+              name="urlTemplate"
               className="w-full rounded border border-black p-2"
               value={urlTemplate}
               onChange={(e) =>
@@ -61,6 +63,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
         <div className="mt-4">
           <input
             type="checkbox"
+            name="isEnabled"
             className="h-4 w-4 rounded border-black text-blue-600 focus:ring-blue-500"
             checked={isEnabled}
             onChange={(e) =>
