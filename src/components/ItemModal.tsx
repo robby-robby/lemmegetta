@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-// import { type VxErrorsType } from "~/hooks/useVxErrors";
-import { type ItemMutateProps, NullItem, type ItemType } from "~/models/items";
+import { NullItem, type ItemType, type ItemsErrorsFlat } from "~/models/items";
 import { type FormFieldErrorsObject } from "~/utils/misc";
 
 interface ItemModalProps {
@@ -9,7 +8,7 @@ interface ItemModalProps {
   onClose: () => void;
   onSubmit: (formData: ItemType) => void;
   defaultItem?: ItemType;
-  vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
+  vxErrors?: ItemsErrorsFlat;
 }
 
 export const ItemModalState = {
@@ -39,7 +38,8 @@ export const ItemModalForm = ({
   close: () => void;
   submit: (i: ItemType) => void;
   item: ItemType;
-  vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
+  // vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
+  vxErrors?: ItemsErrorsFlat;
 }) => {
   //TODO: get proper types for vxErrors
   // http://trpc.io/docs/client/vanilla/infer-types

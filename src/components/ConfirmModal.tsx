@@ -71,6 +71,8 @@ export const ConfirmModal: React.FC<Props> = ({
   cancel,
   message,
 }) => {
+  const [inputRef, setInputFocus] = useButtonFocus();
+  useEffect(() => setInputFocus(), [setInputFocus]);
   return (
     <div className={`${state === ConfirmState.open ? "" : "hidden"}`}>
       <div
@@ -127,6 +129,7 @@ export const ConfirmModal: React.FC<Props> = ({
                     if (typeof ok === "function") ok();
                     if (typeof close === "function") close();
                   }}
+                  ref={inputRef}
                   className="rounded bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-700"
                 >
                   Ok 👍

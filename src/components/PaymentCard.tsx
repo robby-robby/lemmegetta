@@ -1,11 +1,10 @@
 import React from "react";
-import { VxErrorsType } from "~/hooks/useVxErrors";
 import {
-  PaymentMutateProps,
+  type PaymentErrorsFlat,
   type PaymentCardInfo,
   type PaymentCards,
+  PaymentErrorsFormat,
 } from "~/models/cards";
-import { FormFieldErrorsObject } from "~/utils/misc";
 
 export type PaymentPropSetter = <
   T extends keyof PaymentCards,
@@ -16,14 +15,18 @@ export type PaymentPropSetter = <
   value: PaymentCardInfo[U]
 ) => void;
 type PaymentCardProps = {
-  paymentType: keyof PaymentCards;
+  paymentType: keyof Omit<PaymentCards, "Cash">;
+  // paymentType: "Venmo" | "CashApp";
   isEnabled: boolean;
   username: string;
   urlTemplate: string;
   reset: () => void;
   setProperty: PaymentPropSetter;
-  vxErrors?: FormFieldErrorsObject<PaymentMutateProps>;
+  // vxErrors?: FormFieldErrorsObject<PaymentMutateProps>;
+  // vxErrors?: z.infer<PaymentMutateProps>;
+  vxErrorsFormat?: PaymentErrorsFormat;
 };
+// type FlattenedErrors = z.inferFlattenedErrors<typeof FormData>;
 
 export const PaymentCard: React.FC<PaymentCardProps> = ({
   reset,
@@ -32,9 +35,10 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
   username,
   urlTemplate,
   setProperty,
-  vxErrors,
+  vxErrorsFormat,
 }) => {
-  const { fieldErrors, formErrors } = vxErrors ?? {};
+  // const myErrorsMessage = myErrors?.message;
+  const fieldErrors = vxErrorsFormat?.[paymentType];
   return (
     <>
       <div className="relative mb-4 w-full rounded-lg bg-slate-100 p-4">
@@ -54,6 +58,12 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
               }
             />
           </label>
+
+          {fieldErrors?.username?._errors && (
+            <p className="mt-1 text-xs text-pink-500">
+              {fieldErrors?.username?._errors[0]}
+            </p>
+          )}
         </div>
 
         <div className="mt-4">
@@ -71,6 +81,12 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
               }
             />
           </label>
+
+          {fieldErrors?.urlTemplate?._errors && (
+            <p className="mt-1 text-xs text-pink-500">
+              {fieldErrors?.urlTemplate?._errors[0]}
+            </p>
+          )}
         </div>
 
         <div className="mt-4">
@@ -94,7 +110,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
           </label>
         </div>
 
-        {formErrors && formErrors.length > 0 && (
+        {/* {formErrors && formErrors.length > 0 && (
           <div className="mb-4">
             {formErrors?.map((error, index) => (
               <p key={index} className="mt-1 text-xs text-pink-500">
@@ -102,7 +118,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
               </p>
             ))}
           </div>
-        )}
+        )} */}
         <div className="flex justify-end">
           <button className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-100">
             Test

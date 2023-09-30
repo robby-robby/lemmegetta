@@ -3,6 +3,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 import { Prisma } from "@prisma/client";
+import { type z } from "zod";
 // import { type typeToFlattenedError } from "zod";
 
 export type FormFieldErrorsObject<U = object, T = string> = {
@@ -34,9 +35,17 @@ type UniqError = {
   };
 };
 
-type ValidationError<T> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ValidationError<T extends z.ZodType<any, any, any>> = {
   data: {
-    validationError: FormFieldErrorsObject<T>;
+    validationError: z.inferFlattenedErrors<T>;
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ValidationFormatError<T extends z.ZodType<any, any, any>> = {
+  data: {
+    validationFormattedError: z.inferFormattedError<T>;
   };
 };
 
@@ -53,9 +62,21 @@ export function isZodError(error: any): error is DataZodError {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isValidationError<T>(error: any): error is ValidationError<T> {
+export function isValidationError<T extends z.ZodType<any, any, any>>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: any
+): error is ValidationError<T> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return error?.data?.validationError !== null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isValidationFormatError<T extends z.ZodType<any, any, any>>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: any
+): error is ValidationFormatError<T> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  return error?.data?.validationFormatError !== null;
 }
 
 export function isUniqueConstraintError(

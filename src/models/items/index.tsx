@@ -1,29 +1,15 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 import type { MenuItemsRouterType } from "~/server/api/routers/items";
-// export type ItemType = {
-//   id: number;
-//   name: string;
-//   description: string;
-//   shortCode: string;
-//   price: number;
-//   imageUrl: string;
-// };
-
-// export const NullItem = {
-//   id: 0,
-//   name: "",
-//   description: "",
-//   shortCode: "",
-//   price: 0,
-//   imageUrl: "",
-// };
-
-//zod of ItemType
 
 export type ItemRoutes = inferRouterOutputs<MenuItemsRouterType>;
 // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
-export type ItemMutateProps = ItemRoutes["update"] | ItemRoutes["create"];
+// export type ItemMutateProps = ItemRoutes["update"] | ItemRoutes["create"];
+
+export type ItemsErrorsFlat = z.inferFlattenedErrors<ItemSchemaType>;
+export type ItemsErrorsFormat = z.inferFormattedError<ItemSchemaType>;
+
+export type ItemSchemaType = typeof ItemSchema;
 
 export const ItemSchemaValid = z.object({
   id: z
@@ -70,7 +56,7 @@ export const NullItem = Object.freeze(
   })
 );
 
-export type ItemType = typeof NullItem;
+export type ItemType = (typeof ItemSchema)["_type"];
 
 export const MockItems: ItemType[] = [
   {

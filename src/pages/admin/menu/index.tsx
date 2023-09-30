@@ -3,8 +3,7 @@
 import React, { type ReactElement, useState, useCallback } from "react";
 import { ItemModal, useItemModal } from "~/components/ItemModal";
 import AdminLayout from "~/components/AdminLayout";
-
-import { ItemMutateProps, NullItem, type ItemType } from "~/models/items";
+import { type ItemSchemaType, NullItem, type ItemType } from "~/models/items";
 import { SaveModal, useSaveModal } from "~/components/SaveModal";
 import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { useItemsRPC } from "~/models/items/useItemsRPC";
@@ -75,11 +74,11 @@ function MenuPage() {
   // vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
 
   // vxErrors?: FormFieldErrorsObject<PaymentMutateProps>;
-  const {
-    vxErrors: vxErrors,
-    vxErrorsSet: vxErrorsSet,
-    vxErrorsReset: vxErrorsReset,
-  } = useVxErrors<ItemMutateProps>();
+  // const { vxFormatErrors, vxFormatErrorsSet, vxFormatErrorsReset } =
+  //   useVxFormatErrors<ItemSchemaType>();
+
+  const { vxErrors, vxErrorsReset, vxErrorsSet } =
+    useVxErrors<ItemSchemaType>();
 
   const onSubmitCreate = async (item: ItemType) => {
     try {
@@ -91,7 +90,8 @@ function MenuPage() {
     } catch (error) {
       if (isValidationError(error)) {
         saveModalClose();
-        return vxErrorsSet(error.data.validationError);
+        // return vxFormatErrorsSet(error.data.validationFormattedError);
+        vxErrorsSet(error.data.validationError);
       }
       saveModalError("Item creation failed");
       if (error instanceof Error) {

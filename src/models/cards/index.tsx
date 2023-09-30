@@ -8,10 +8,19 @@ export type PaymentCardInfo = {
   urlTemplate: string;
 };
 
-export type PaymentRoutes = inferRouterOutputs<PaymentRouterType>;
+// export type PaymentRoutes = inferRouterOutputs<PaymentRouterType>;
 // export type PaymentMutateProps = PaymentRoutes["update"];
 // export type PaymentMutateProps = PaymentCardInfo;
-export type PaymentMutateProps = PaymentCards;
+// export type PaymentMutateProps = PaymentCards;
+// export type PaymentMutateProps = z.inferFlattenedErrors<
+//   typeof PaymentCardsSchema
+// >;
+
+export type PaymentCardsType = typeof PaymentCardsSchema;
+
+export type PaymentErrorsFlat = z.inferFlattenedErrors<PaymentCardsType>;
+
+export type PaymentErrorsFormat = z.inferFormattedError<PaymentCardsType>;
 
 export const PaymentCardsSchemaValid = z.object({
   CashApp: z.object({

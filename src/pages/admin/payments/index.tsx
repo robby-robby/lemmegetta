@@ -3,16 +3,14 @@ import { type ReactElement } from "react";
 
 import AdminLayout from "~/components/AdminLayout";
 import { SaveModal, useSaveModal } from "~/components/SaveModal";
-// import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { PaymentsCardsForm } from "~/components/PaymentsCardsForm";
 import { usePaymentCardsRPC } from "~/models/cards/usePaymentCardsRPC";
-import { FormFieldErrorsObject, isValidationError } from "~/utils/misc";
-import { useVxErrors } from "~/hooks/useVxErrors";
-import { PaymentCardInfo, PaymentMutateProps } from "~/models/cards";
+import { isValidationFormatError } from "~/utils/misc";
+import { useVxFormatErrors } from "~/hooks/useVxErrors";
+import { type PaymentCardsType } from "~/models/cards";
 
 export default function Payments() {
   const {
-    open: saveModalOpen,
     success: saveModalSuccess,
     error: saveModalError,
     loading: saveModalLoading,
@@ -22,32 +20,22 @@ export default function Payments() {
     status: saveModalStatus,
   } = useSaveModal();
 
-  // useEscapeModal(saveModalClose);
+  const { cards, setProperty, reset, updateAsync } = usePaymentCardsRPC();
 
-  const {
-    cards,
-    setProperty,
-    reset,
-    updateAsync,
-    paymentsMuUpdate: paymentsMutation,
-  } = usePaymentCardsRPC();
-
-  const {
-    vxErrors: vxErrors,
-    vxErrorsSet: vxErrorsSet,
-    vxErrorsReset: vxErrorsReset,
-  } = useVxErrors<PaymentMutateProps>();
+  const { vxFormatErrors, vxFormatErrorsSet, vxFormatErrorsReset } =
+    useVxFormatErrors<PaymentCardsType>();
 
   const handleSubmit = async () => {
     try {
+      vxFormatErrorsReset();
       saveModalLoading("...");
       await updateAsync(cards);
       saveModalSuccess("Payment settings updated");
     } catch (error) {
       console.log(JSON.stringify(error, null, 4));
-      if (isValidationError<PaymentMutateProps>(error)) {
+      if (isValidationFormatError<PaymentCardsType>(error)) {
         saveModalClose();
-        return vxErrorsSet(error.data.validationError);
+        return vxFormatErrorsSet(error.data.validationFormattedError);
       } else {
         saveModalError("Something went wrong.");
       }
@@ -70,7 +58,7 @@ export default function Payments() {
           <div className="m-4 w-full max-w-lg rounded-lg bg-white shadow-md sm:p-3 ">
             <PaymentsCardsForm
               reset={reset}
-              vxErrors={vxErrors}
+              vxErrorsFormat={vxFormatErrors}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               handleSubmit={handleSubmit}
               cards={cards}

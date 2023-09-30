@@ -1,6 +1,10 @@
 import React from "react";
-import { type PaymentMutateProps, type PaymentCards } from "~/models/cards";
-import { type FormFieldErrorsObject } from "~/utils/misc";
+import {
+  PaymentErrorsFormat,
+  // type PaymentMutateProps,
+  type PaymentCards,
+  type PaymentErrorsFlat,
+} from "~/models/cards";
 // import { type PropSetter } from "~/pages/admin/PropSetter";
 import { PaymentCard, type PaymentPropSetter } from "./PaymentCard";
 
@@ -9,13 +13,13 @@ export function PaymentsCardsForm({
   setProperty,
   reset,
   cards,
-  vxErrors,
+  vxErrorsFormat,
 }: {
   cards: PaymentCards;
   reset: (card: keyof PaymentCards) => void;
   setProperty: PaymentPropSetter;
   handleSubmit: () => void;
-  vxErrors: FormFieldErrorsObject<PaymentMutateProps>;
+  vxErrorsFormat?: PaymentErrorsFormat;
 }) {
   return (
     <div className="space-y-4">
@@ -26,7 +30,7 @@ export function PaymentsCardsForm({
         username={cards.CashApp.username}
         urlTemplate={cards.CashApp.urlTemplate}
         setProperty={setProperty}
-        vxErrors={vxErrors}
+        vxErrorsFormat={vxErrorsFormat}
       />
       <PaymentCard
         reset={() => reset("Venmo")}
@@ -35,7 +39,7 @@ export function PaymentsCardsForm({
         username={cards.Venmo.username}
         urlTemplate={cards.Venmo.urlTemplate}
         setProperty={setProperty}
-        vxErrors={vxErrors}
+        vxErrorsFormat={vxErrorsFormat}
       />
 
       <div className="relative mb-4 w-full rounded-lg bg-slate-100 p-4">

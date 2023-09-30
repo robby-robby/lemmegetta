@@ -16,7 +16,7 @@ import { ZodError, type typeToFlattenedError } from "zod";
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "~/server/db";
 import {
-  FormFieldErrorsObject,
+  type FormFieldErrorsObject,
   isUniqueConstraintError,
   isZodError,
   MergeFormErrors,
@@ -105,21 +105,23 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     const uniqError = isUniqueConstraintError(error.cause)
       ? uniqFormErrors(error.cause)
       : null;
+    const validationFormattedError =
+      error.cause instanceof ZodError ? error.cause.format() : null;
     const validationError = MergeFormErrors(
       zodError as FormFieldErrorsObject,
       uniqError
     );
 
-    const e = {
+    return {
       ...shape,
       data: {
         ...shape.data,
         validationError,
+        validationFormattedError,
         zodError,
         uniqError,
       },
     };
-    return e;
   },
 });
 
