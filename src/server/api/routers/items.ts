@@ -13,18 +13,20 @@ export const menuItemsRouter = createTRPCRouter({
 
   //make all fields required
 
-  update: protectedProcedure.input(ItemSchema).mutation(({ input, ctx }) => {
-    return ctx.prisma.menuItems.update({
-      where: { id: input.id },
-      data: {
-        name: input.name,
-        price: input.price,
-        description: input.description,
-        imageUrl: input.imageUrl,
-        shortCode: input.shortCode,
-      },
-    });
-  }),
+  update: protectedProcedure
+    .input(ItemSchemaValid)
+    .mutation(({ input, ctx }) => {
+      return ctx.prisma.menuItems.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          price: input.price,
+          description: input.description,
+          imageUrl: input.imageUrl,
+          shortCode: input.shortCode,
+        },
+      });
+    }),
 
   create: protectedProcedure
     .input(ItemSchemaValid)

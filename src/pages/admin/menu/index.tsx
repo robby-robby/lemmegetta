@@ -6,9 +6,13 @@ import { ItemModal, useItemModal } from "~/components/ItemModal";
 import AdminLayout from "~/components/AdminLayout";
 
 import { NullItem, type ItemType } from "~/models/items";
-import { SaveModal, useSaveModal } from "~/components/SaveModal";
+import {
+  SaveModal,
+  SaveStatusType,
+  useSaveModal,
+} from "~/components/SaveModal";
 import { useEscapeModal } from "~/hooks/useEscapeModal";
-import { useItemsRPC } from "~/models/items/useItemsRPC";
+import { ItemsRPCAction, useItemsRPC } from "~/models/items/useItemsRPC";
 import { useItemEditor } from "~/models/items/useItemEditor";
 import { isZodError, ZodErrorObject } from "~/utils/misc";
 
@@ -18,7 +22,7 @@ function MenuPage() {
     close: saveModalClose,
     state: saveModalState,
     status: saveModalStatus,
-    onStatusChange,
+    setStatus: saveModalSetStatus,
   } = useSaveModal();
 
   const { open: addOpen, close: addClose, state: addState } = useItemModal();
@@ -27,12 +31,13 @@ function MenuPage() {
   const [addItem, setAddItem] = useState({ ...NullItem });
   const addItemReset = () => setAddItem({ ...NullItem });
 
-  const onFailure = (e: Error) => {
-    console.error(e);
-    throw e;
+  const openSaveModal = (status: SaveStatusType, action: ItemsRPCAction) => {
+    saveModalSetStatus(status);
+    if (action === "delete") saveModalOpen();
+    else if (action === "update" && status === "success") saveModalOpen();
   };
   const { items, remove, createAsync, updateAsync } =
-    useItemsRPC(onStatusChange);
+    useItemsRPC(openSaveModal);
 
   const { editItem, editItemById } = useItemEditor(items);
 
@@ -41,7 +46,7 @@ function MenuPage() {
   const onSubmitCreate = async (item: ItemType) => {
     try {
       await createAsync(item);
-      saveModalOpen();
+      // saveModalOpen();
       addClose();
       setAddItem({ ...NullItem });
     } catch (error) {
@@ -49,9 +54,6 @@ function MenuPage() {
         return zodErrorsSet(error.data.zodError);
       }
       //ELSE TODO WTF OMG!
-      // throw error
-      addClose();
-      saveModalOpen();
     }
   };
 
@@ -59,8 +61,10 @@ function MenuPage() {
     try {
       await updateAsync(item);
       editClose();
-    } catch (e) {
-      onFailure(e as Error);
+    } catch (error) {
+      if (isZodError(error)) {
+        return zodErrorsSet(error.data.zodError);
+      }
     }
   };
   useEscapeModal(editClose);

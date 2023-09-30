@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { MutableRefObject, useEffect } from "react";
 
 import { useState } from "react";
 import { BsCheckCircle } from "react-icons/bs";
 import { FiAlertTriangle } from "react-icons/fi";
-import { useFocus } from "~/hooks/useFocus";
+import { useButtonFocus } from "~/hooks/useFocus";
 import { Spinner } from "./Spinner";
 import { TRPCStatus } from "../utils/TRPCStatus";
 
@@ -40,11 +40,11 @@ export const useSaveModal = (): {
   close: () => void;
   state: SaveStates;
   status: SaveStatusType;
-  onStatusChange: (status: SaveStatusType) => void;
+  setStatus: (status: SaveStatusType) => void;
   setState: (state: SaveStates) => void;
 } => {
   const [state, setState] = useState<SaveStates>(false);
-  const [status, onStatusChange] = useState<SaveStatusType>(TRPCStatus.idle);
+  const [status, setStatus] = useState<SaveStatusType>(TRPCStatus.idle);
   const close = () => {
     setState(SaveState.close);
   };
@@ -52,7 +52,7 @@ export const useSaveModal = (): {
     setState(SaveState.open);
   };
 
-  return { open, close, state, setState, status, onStatusChange };
+  return { open, close, state, setState, status, setStatus: setStatus };
 };
 
 type Props = {
@@ -69,7 +69,7 @@ export const SaveModal: React.FC<Props> = ({
   stickyOpen = true,
 }) => {
   const color = status === TRPCStatus.success ? "green" : "red";
-  const [inputRef, setInputFocus] = useFocus();
+  const [inputRef, setInputFocus] = useButtonFocus();
   const onClose = () => {
     if (status !== TRPCStatus.loading || !stickyOpen) {
       close();

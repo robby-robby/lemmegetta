@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import { type ItemType } from "~/models/items";
-import { type SaveStatusType } from "~/components/SaveModal";
+import { SaveState, type SaveStatusType } from "~/components/SaveModal";
 import { TRPCStatus } from "~/utils/TRPCStatus";
+// import { sta} from '@trpc/server';
 
-export function useItemsRPC(onStatusChange: (status: SaveStatusType) => void) {
+export type ItemsRPCAction = "create" | "update" | "delete";
+
+export function useItemsRPC(
+  onStatusChange: (
+    status: SaveStatusType,
+    action: ItemsRPCAction
+  ) => void | ((status: SaveStatusType) => void)
+) {
   const [items, setItems] = useState<ItemType[]>([]);
   const itemsQuery = api.menuItems.getAll.useQuery();
   const itemsMuCreate = api.menuItems.create.useMutation();
@@ -18,22 +26,31 @@ export function useItemsRPC(onStatusChange: (status: SaveStatusType) => void) {
   }, [itemsQuery.data, itemsQuery.status]);
 
   useEffect(() => {
-    if (
-      itemsMuCreate.status === TRPCStatus.success ||
-      itemsMuUpdate.status === TRPCStatus.success ||
-      itemsMuDelete.status === TRPCStatus.success
-    ) {
+    if (itemsMuCreate.status !== TRPCStatus.idle) {
+      onStatusChange(itemsMuCreate.status, "create");
+    }
+    if (itemsMuCreate.status === TRPCStatus.success) {
       void itemsQuery.refetch();
     }
-  }, [itemsMuCreate.status, itemsMuUpdate.status, itemsMuDelete.status]);
-
-  useEffect(() => {
-    onStatusChange(itemsMuCreate.status);
   }, [itemsMuCreate.status]);
 
   useEffect(() => {
-    onStatusChange(itemsMuUpdate.status);
+    if (itemsMuUpdate.status !== TRPCStatus.idle) {
+      onStatusChange(itemsMuUpdate.status, "update");
+    }
+    if (itemsMuUpdate.status === TRPCStatus.success) {
+      void itemsQuery.refetch();
+    }
   }, [itemsMuUpdate.status]);
+
+  useEffect(() => {
+    if (itemsMuDelete.status !== TRPCStatus.idle) {
+      onStatusChange(itemsMuDelete.status, "delete");
+    }
+    if (itemsMuDelete.status === TRPCStatus.success) {
+      void itemsQuery.refetch();
+    }
+  }, [itemsMuDelete.status]);
 
   const create = (item: ItemType) => {
     return itemsMuCreate.mutate(item);
@@ -51,17 +68,22 @@ export function useItemsRPC(onStatusChange: (status: SaveStatusType) => void) {
   const updateAsync = (item: ItemType) => {
     return itemsMuUpdate.mutateAsync(item);
   };
+  const removeAsync = (itemId: ItemType["id"]) => {
+    return itemsMuDelete.mutateAsync({ id: itemId });
+  };
 
   return {
     items,
     createAsync,
     updateAsync,
+    removeAsync,
     create,
     remove,
     update,
     refetch: itemsQuery.refetch,
     itemsMuCreate,
     itemsMuUpdate,
+    itemsMuDelete,
     itemsQuery,
   };
 }

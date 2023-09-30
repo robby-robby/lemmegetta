@@ -1,10 +1,10 @@
-import { useRef, MutableRefObject } from "react";
+import { useRef, type MutableRefObject } from "react";
 
-export const useFocus = (): [
-  MutableRefObject<HTMLInputElement | null>,
+export const useButtonFocus = (): [
+  MutableRefObject<HTMLButtonElement | null>,
   () => void
 ] => {
-  const htmlElRef = useRef<HTMLInputElement | null>(null);
+  const htmlElRef = useRef<HTMLButtonElement | null>(null);
   const setFocus = (): void => {
     htmlElRef.current?.focus();
   };

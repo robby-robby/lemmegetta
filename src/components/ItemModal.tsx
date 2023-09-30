@@ -26,14 +26,6 @@ export function useItemModal() {
   return { open, close, state: showModal };
 }
 
-// function useHasErrors(errors: object) {
-//   useEffect(() => {
-//     if (Object.keys(errors).length > 0) {
-//       console.log("errors:", errors);
-//     }
-//   }, [errors]);
-// }
-
 export const ItemModalForm = ({
   fileChange,
   inputChange,
@@ -41,16 +33,12 @@ export const ItemModalForm = ({
   close,
   submit,
   zodErrors,
-}: // formErrors,
-// fieldErrors,
-{
+}: {
   fileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   close: () => void;
   submit: (i: ItemType) => void;
   item: ItemType;
-  // formErrors?: string[];
-  // fieldErrors?: Record<string, string[]>;
   zodErrors?: ZodErrorObject;
 }) => {
   const { fieldErrors, formErrors } = zodErrors ?? {};
@@ -172,15 +160,16 @@ export const ItemModal: React.FC<Props> = ({
   show,
   onClose,
   onSubmit,
+  zodErrors,
   defaultItem = NullItem,
   title = "Item",
-  zodErrors,
 }) => {
   const [itemFormData, setItemFormData] = React.useState<ItemType>(defaultItem);
 
-  useEffect(() => {
-    setItemFormData(defaultItem);
-  }, [defaultItem]);
+  // this was used for a reset but is too buggy
+  // useEffect(() => {
+  //   setItemFormData(defaultItem);
+  // }, [defaultItem]);
 
   const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
