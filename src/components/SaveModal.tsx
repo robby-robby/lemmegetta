@@ -39,20 +39,41 @@ export const useSaveModal = (): {
   open: () => void;
   close: () => void;
   state: SaveStates;
+  message: string;
+  setMessage: (message: string) => void;
   status: SaveStatusType;
   setStatus: (status: SaveStatusType) => void;
+  reset: () => void;
   setState: (state: SaveStates) => void;
 } => {
   const [state, setState] = useState<SaveStates>(false);
   const [status, setStatus] = useState<SaveStatusType>(TRPCStatus.idle);
+  const [message, setMessage] = useState<string>("");
+  const reset = () => {
+    setMessage("");
+    setStatus(TRPCStatus.idle);
+  };
   const close = () => {
     setState(SaveState.close);
   };
   const open = () => {
     setState(SaveState.open);
   };
+  useEffect(() => {
+    if (state == SaveState.close) reset();
+  }, [state]);
 
-  return { open, close, state, setState, status, setStatus: setStatus };
+  return {
+    open,
+    close,
+    reset,
+    state,
+    message,
+    setMessage,
+    setState,
+    status,
+    setStatus,
+  };
 };
 
 type Props = {
@@ -60,6 +81,8 @@ type Props = {
   status: SaveStatusType;
   state: SaveStates;
   close: () => void;
+
+  message?: string;
 };
 
 export const SaveModal: React.FC<Props> = ({
@@ -67,6 +90,7 @@ export const SaveModal: React.FC<Props> = ({
   close,
   status,
   stickyOpen = true,
+  message,
 }) => {
   const color = status === TRPCStatus.success ? "green" : "red";
   const [inputRef, setInputFocus] = useButtonFocus();
@@ -74,6 +98,7 @@ export const SaveModal: React.FC<Props> = ({
     if (status !== TRPCStatus.loading || !stickyOpen) {
       close();
     }
+    // setMessage("");
   };
   useEffect(() => {
     if (status !== TRPCStatus.loading) {
@@ -83,7 +108,6 @@ export const SaveModal: React.FC<Props> = ({
   return (
     <div className={`${state === SaveState.open ? "" : "hidden"}`}>
       <div
-        id="popup-modal"
         tabIndex={-1}
         className="fixed left-0 right-0 top-0 z-50 flex h-full max-h-full justify-center overflow-y-auto overflow-x-hidden bg-gray-500/75 p-4 align-middle md:inset-0"
       >
@@ -121,6 +145,9 @@ export const SaveModal: React.FC<Props> = ({
                 {status === TRPCStatus.error ? "Error updating :(" : null}
                 {status === TRPCStatus.loading ? "Loading..." : null}
               </h3>
+              {message ? (
+                <pre className="m-10 text-sm text-gray-500">{message}</pre>
+              ) : null}
               <button
                 data-modal-hide="popup-modal"
                 type="button"

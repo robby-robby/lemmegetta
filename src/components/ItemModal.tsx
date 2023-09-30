@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 // import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { NullItem, type ItemType } from "~/models/items";
-import { ZodErrorObject } from "~/utils/misc";
+import { FormFieldErrorsObject } from "~/utils/misc";
 
 interface Props {
   title?: string;
@@ -9,7 +9,7 @@ interface Props {
   onClose: () => void;
   onSubmit: (formData: ItemType) => void;
   defaultItem?: ItemType;
-  zodErrors?: ZodErrorObject;
+  vxErrors?: FormFieldErrorsObject;
 }
 
 export const ItemModalState = {
@@ -32,16 +32,16 @@ export const ItemModalForm = ({
   item,
   close,
   submit,
-  zodErrors,
+  vxErrors,
 }: {
   fileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   close: () => void;
   submit: (i: ItemType) => void;
   item: ItemType;
-  zodErrors?: ZodErrorObject;
+  vxErrors?: FormFieldErrorsObject;
 }) => {
-  const { fieldErrors, formErrors } = zodErrors ?? {};
+  const { fieldErrors, formErrors } = vxErrors ?? {};
   return (
     <div className="mt-5">
       <div className="mb-4">
@@ -110,7 +110,7 @@ export const ItemModalForm = ({
           onChange={inputChange}
           required
           className={`mt-1 w-full rounded-md border p-2 ${
-            fieldErrors?.shortCode ? "border-red-500" : ""
+            fieldErrors?.price ? "border-red-500" : ""
           }`}
         />
         {fieldErrors?.price && (
@@ -160,16 +160,15 @@ export const ItemModal: React.FC<Props> = ({
   show,
   onClose,
   onSubmit,
-  zodErrors,
+  vxErrors,
   defaultItem = NullItem,
   title = "Item",
 }) => {
   const [itemFormData, setItemFormData] = React.useState<ItemType>(defaultItem);
 
-  // this was used for a reset but is too buggy
-  // useEffect(() => {
-  //   setItemFormData(defaultItem);
-  // }, [defaultItem]);
+  useEffect(() => {
+    setItemFormData(defaultItem);
+  }, [defaultItem.id, show]);
 
   const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -190,7 +189,7 @@ export const ItemModal: React.FC<Props> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 overflow-y-auto ${show ? "" : "hidden"}`}
+      className={`fixed inset-0 z-40 overflow-y-auto ${show ? "" : "hidden"}`}
     >
       <div className="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -221,7 +220,7 @@ export const ItemModal: React.FC<Props> = ({
                   fileChange={fileChange}
                   item={itemFormData}
                   inputChange={inputChange}
-                  zodErrors={zodErrors}
+                  vxErrors={vxErrors}
                 />
               </div>
             </div>

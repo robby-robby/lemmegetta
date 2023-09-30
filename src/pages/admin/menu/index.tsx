@@ -8,13 +8,19 @@ import AdminLayout from "~/components/AdminLayout";
 import { NullItem, type ItemType } from "~/models/items";
 import {
   SaveModal,
-  SaveStatusType,
+  type SaveStatusType,
   useSaveModal,
 } from "~/components/SaveModal";
 import { useEscapeModal } from "~/hooks/useEscapeModal";
-import { ItemsRPCAction, useItemsRPC } from "~/models/items/useItemsRPC";
+import { type ItemsRPCAction, useItemsRPC } from "~/models/items/useItemsRPC";
 import { useItemEditor } from "~/models/items/useItemEditor";
-import { isZodError, ZodErrorObject } from "~/utils/misc";
+import {
+  isUniqError,
+  isValidationError,
+  isZodError,
+  type FormFieldErrorsObject,
+} from "~/utils/misc";
+// import { isUniqueConstraintError } from "~/utils/uniqueConstraintErrors";
 
 function MenuPage() {
   const {
@@ -22,6 +28,8 @@ function MenuPage() {
     close: saveModalClose,
     state: saveModalState,
     status: saveModalStatus,
+    setMessage: saveModalSetMessage,
+    message: saveModalMessage,
     setStatus: saveModalSetStatus,
   } = useSaveModal();
 
@@ -41,19 +49,29 @@ function MenuPage() {
 
   const { editItem, editItemById } = useItemEditor(items);
 
-  const { zodErrors, zodErrorsSet, zodErrorsReset } = useZodErrors();
+  const {
+    vxErrors: vxErrors,
+    vxErrorsSet: vxErrorsSet,
+    vxErrorsReset: vxErrorsReset,
+  } = useVxErrors();
 
   const onSubmitCreate = async (item: ItemType) => {
     try {
       await createAsync(item);
-      // saveModalOpen();
+      saveModalOpen();
       addClose();
       setAddItem({ ...NullItem });
     } catch (error) {
-      if (isZodError(error)) {
-        return zodErrorsSet(error.data.zodError);
+      if (isValidationError(error)) {
+        return vxErrorsSet(error.data.validationError);
       }
-      //ELSE TODO WTF OMG!
+      saveModalOpen();
+      if (error instanceof Error) {
+        saveModalSetMessage(error.message ?? "Unknown error");
+      } else {
+        saveModalSetMessage("Unknown error");
+        console.error(error);
+      }
     }
   };
 
@@ -63,20 +81,20 @@ function MenuPage() {
       editClose();
     } catch (error) {
       if (isZodError(error)) {
-        return zodErrorsSet(error.data.zodError);
+        return vxErrorsSet(error.data.zodError);
       }
     }
   };
   useEscapeModal(editClose);
 
   const openAddItem = () => {
-    zodErrorsReset();
+    vxErrorsReset();
     addItemReset();
     addOpen();
   };
 
   const openEditItem = (itemId: string) => {
-    zodErrorsReset();
+    vxErrorsReset();
     editItemById(itemId);
     editOpen();
   };
@@ -94,6 +112,8 @@ function MenuPage() {
         state={saveModalState}
         close={saveModalClose}
         status={saveModalStatus}
+        message={saveModalMessage}
+        // message="maybe get fucked?"
       />
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-center">
@@ -118,7 +138,7 @@ function MenuPage() {
           onClose={editClose}
           onSubmit={onSubmitEdit}
           defaultItem={editItem}
-          zodErrors={zodErrors}
+          vxErrors={vxErrors}
         />
         <ItemModal
           title="Add Item"
@@ -126,25 +146,24 @@ function MenuPage() {
           onClose={addClose}
           onSubmit={onSubmitCreate}
           defaultItem={addItem}
-          zodErrors={zodErrors}
+          vxErrors={vxErrors}
         />
       </div>
     </>
   );
 }
 
-function useZodErrors() {
-  const [zodErrors, zodErrorsSet] = useState<ZodErrorObject>({
+function useVxErrors() {
+  const [vxErrors, vxErrorsSet] = useState<FormFieldErrorsObject>({
     formErrors: [],
     fieldErrors: {},
   });
-  const zodErrorsReset = () =>
-    zodErrorsSet({ formErrors: [], fieldErrors: {} });
+  const vxErrorsReset = () => vxErrorsSet({ formErrors: [], fieldErrors: {} });
 
   return {
-    zodErrors,
-    zodErrorsSet,
-    zodErrorsReset,
+    vxErrors: vxErrors,
+    vxErrorsSet: vxErrorsSet,
+    vxErrorsReset: vxErrorsReset,
   };
 }
 function ItemsGrid({

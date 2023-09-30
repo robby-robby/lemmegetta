@@ -1,7 +1,7 @@
 import React from "react";
 import { type PaymentCards } from "~/models/cards";
-import { type PropSetter } from "~/pages/admin/PropSetter";
-import { PaymentCard } from "./PaymentCard";
+// import { type PropSetter } from "~/pages/admin/PropSetter";
+import { PaymentCard, PaymentPropSetter } from "./PaymentCard";
 
 export function PaymentsCardsForm({
   handleSubmit,
@@ -11,7 +11,7 @@ export function PaymentsCardsForm({
 }: {
   cards: PaymentCards;
   reset: (card: keyof PaymentCards) => void;
-  setProperty: PropSetter;
+  setProperty: PaymentPropSetter;
   handleSubmit: () => void;
 }) {
   return (
@@ -33,7 +33,7 @@ export function PaymentsCardsForm({
         setProperty={setProperty}
       />
 
-      <div className="relative mb-4 w-full rounded-lg bg-gray-200 p-4">
+      <div className="relative mb-4 w-full rounded-lg bg-slate-100 p-4">
         <h3 className="text-lg font-bold">Cash</h3>
         <div className="mt-4">
           <input

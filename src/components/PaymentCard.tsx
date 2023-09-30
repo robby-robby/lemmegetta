@@ -28,7 +28,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
 }) => {
   return (
     <>
-      <div className="relative mb-4 w-full rounded-lg bg-gray-200 p-4">
+      <div className="relative mb-4 w-full rounded-lg bg-slate-100 p-4">
         <h3 className="text-lg font-bold">{paymentType}</h3>
         <div className="mt-4">
           <label className="mb-1 text-sm text-gray-900">

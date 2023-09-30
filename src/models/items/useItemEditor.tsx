@@ -22,5 +22,11 @@ export function useItemEditor(items: ItemType[]) {
     setEditItemId("");
     setEditItem(NullItem);
   };
-  return { editItem, editItemById: editItemById, setEditItem, editItemReset };
+  return {
+    editItem,
+    editItemById: editItemById,
+    editItemId,
+    setEditItem,
+    editItemReset,
+  };
 }

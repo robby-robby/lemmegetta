@@ -7,13 +7,26 @@
  * need to use are documented accordingly near the end.
  */
 
+import { Prisma } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { ZodError, type typeToFlattenedError } from "zod";
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "~/server/db";
+import {
+  FormFieldErrorsObject,
+  isUniqueConstraintError,
+  isZodError,
+  MergeFormErrors,
+  UniqueConstraintError,
+} from "~/utils/misc";
+import {
+  // isUniqueConstraintError,
+  uniqFormErrors,
+  // UniqueConstraintError,
+} from "../../utils/uniqueConstraintErrors";
 
 /**
  * 1. CONTEXT
@@ -61,23 +74,49 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   });
 };
 
-/**
- * 2. INITIALIZATION
- *
- * This is where the tRPC API is initialized, connecting the context and transformer. We also parse
- * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
- * errors on the backend.
- */
+/*codes
+
+  P2000 "The provided value for the column is too long for the column's type. Column: {column_name}"
+  P2002 "Unique constraint failed on the {constraint}"
+  P2004 "A constraint failed on the database: {database_error}"
+  P2011 "Null constraint violation on the {constraint}"
+*/
+
+// type ValidationError = ZodError | UniqueConstraintError;
+
+// function isValidationError(error: unknown): error is ValidationError {
+//   return isZodError(error) || isUniqueConstraintError(error);
+// }
+
+// export declare type typeToFlattenedError<T, U = string> = {
+//     formErrors: U[];
+//     fieldErrors: {
+//         [P in allKeys<T>]?: U[];
+//     };
+// };
+
+// typeToFlattenedError<Prisma.UserCreateInput>
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
+    const zodError =
+      error.cause instanceof ZodError ? error.cause.flatten() : null;
+    const uniqError = isUniqueConstraintError(error.cause)
+      ? uniqFormErrors(error.cause)
+      : null;
+    const validationError = MergeFormErrors(
+      zodError as FormFieldErrorsObject,
+      uniqError
+    );
+
     const e = {
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        validationError,
+        zodError,
+        uniqError,
       },
     };
     return e;

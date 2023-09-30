@@ -21,7 +21,7 @@ model MenuItems {
   name        String //zod: required
   price       Float //zod: required
   description String //zod: required
-  shortCode   String //zod: required, max 8 characters 
+  shortCode   String   @unique //zod: required, max 8 characters 
   imageUrl    String //zod: optional, default "https://placehold.co/400"
 }
 
