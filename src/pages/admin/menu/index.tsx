@@ -24,7 +24,7 @@ function MenuPage() {
     status: saveModalStatus,
     setMessage: saveModalSetMessage,
     message: saveModalMessage,
-    // setStatus: saveModalSetStatus,
+    toughError: saveModalToughError,
   } = useSaveModal();
 
   const {
@@ -47,17 +47,7 @@ function MenuPage() {
   const [addItem, setAddItem] = useState({ ...NullItem });
   const addItemReset = () => setAddItem({ ...NullItem });
 
-  // const openSaveModal = (status: SaveStatusType, action: ItemsRPCAction) => {
-  //   saveModalSetStatus(status);
-  //   const outcome = status === "success" ? "successful" : "failed";
-  //   saveModalOpen(action + " " + outcome);
-  // };
-
   const { items, removeAsync, createAsync, updateAsync } = useItemsRPC();
-  // (status) =>
-  //   status === "loading"
-  //     ? saveModalOpen({ status, message: "..." })
-  //     : undefined
 
   const { editItem, editItemById } = useItemEditor(items);
 
@@ -70,12 +60,6 @@ function MenuPage() {
     },
     [items]
   );
-
-  // vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
-
-  // vxErrors?: FormFieldErrorsObject<PaymentMutateProps>;
-  // const { vxFormatErrors, vxFormatErrorsSet, vxFormatErrorsReset } =
-  //   useVxFormatErrors<ItemSchemaType>();
 
   const { vxErrors, vxErrorsReset, vxErrorsSet } =
     useVxErrors<ItemSchemaType>();
@@ -90,18 +74,10 @@ function MenuPage() {
     } catch (error) {
       if (isValidationError(error)) {
         saveModalClose();
-        // return vxFormatErrorsSet(error.data.validationFormattedError);
         vxErrorsSet(error.data.validationError);
-      }
-      saveModalError("Item creation failed");
-      if (error instanceof Error) {
-        saveModalSetMessage(error.message ?? "Unknown error");
       } else {
-        saveModalSetMessage("Unknown error");
-        console.error(error);
+        saveModalToughError(error, "Item creation failed");
       }
-    } finally {
-      // saveModalClose();
     }
   };
 
@@ -111,17 +87,7 @@ function MenuPage() {
       await removeAsync(itemId);
       saveModalSuccess("Item removed");
     } catch (error) {
-      // if (isZodError(error)) {
-      //   return vxErrorsSet(error.data.zodError);
-      // }
-      let message = "Unknown error";
-      if (error instanceof Error && error.message) {
-        message = error.message;
-      }
-      saveModalError(message);
-      console.error(error);
-    } finally {
-      // saveModalClose();
+      saveModalToughError(error, "Error removing item");
     }
   };
 
@@ -136,10 +102,8 @@ function MenuPage() {
         saveModalClose();
         return vxErrorsSet(error.data.validationError);
       } else {
-        saveModalError("Item update failed");
+        saveModalToughError(error, "Item update failed");
       }
-    } finally {
-      // saveModalClose();
     }
   };
 

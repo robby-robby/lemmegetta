@@ -66,6 +66,15 @@ export const useSaveModal = () => {
   const error = _openWithStatus(SaveStatus.error);
   const loading = _openWithStatus(TRPCStatus.loading);
 
+  function toughError(err: unknown, msg?: string) {
+    let message = typeof err == "string" ? err : msg + ":\n" + "Unknown error";
+    if (err instanceof Error && err.message) {
+      message = err.message;
+    }
+    error(message);
+    console.error(message);
+  }
+
   useEffect(() => {
     if (state == SaveState.close) reset();
   }, [state]);
@@ -80,6 +89,7 @@ export const useSaveModal = () => {
     state,
     message,
     setMessage,
+    toughError,
     setState,
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     status: status as SaveStatusType,

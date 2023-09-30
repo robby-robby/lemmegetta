@@ -18,6 +18,7 @@ export default function Payments() {
     message: saveModalMessage,
     state: saveModalState,
     status: saveModalStatus,
+    toughError: saveModalToughError,
   } = useSaveModal();
 
   const { cards, setProperty, reset, updateAsync } = usePaymentCardsRPC();
@@ -32,12 +33,11 @@ export default function Payments() {
       await updateAsync(cards);
       saveModalSuccess("Payment settings updated");
     } catch (error) {
-      console.log(JSON.stringify(error, null, 4));
       if (isValidationFormatError<PaymentCardsType>(error)) {
         saveModalClose();
         return vxFormatErrorsSet(error.data.validationFormattedError);
       } else {
-        saveModalError("Something went wrong.");
+        saveModalToughError(null, "Something went wrong");
       }
     }
   };
