@@ -5,9 +5,9 @@
 import { Prisma } from "@prisma/client";
 // import { type typeToFlattenedError } from "zod";
 
-export type FormFieldErrorsObject<T = string> = {
+export type FormFieldErrorsObject<U = object, T = string> = {
   formErrors: string[];
-  fieldErrors: Record<string, T[] | string[]>;
+  fieldErrors: Record<keyof U, T[] | string[]> & object;
 };
 
 // export type FormFieldErrorsObject<T> = typeToFlattenedError<T  object>;
@@ -34,9 +34,9 @@ type UniqError = {
   };
 };
 
-type ValidationError = {
+type ValidationError<T> = {
   data: {
-    validationError: FormFieldErrorsObject;
+    validationError: FormFieldErrorsObject<T>;
   };
 };
 
@@ -53,7 +53,7 @@ export function isZodError(error: any): error is DataZodError {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isValidationError(error: any): error is ValidationError {
+export function isValidationError<T>(error: any): error is ValidationError<T> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return error?.data?.validationError !== null;
 }

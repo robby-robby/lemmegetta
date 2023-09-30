@@ -1,4 +1,6 @@
+import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
+import type { MenuItemsRouterType } from "~/server/api/routers/items";
 // export type ItemType = {
 //   id: number;
 //   name: string;
@@ -18,6 +20,11 @@ import { z } from "zod";
 // };
 
 //zod of ItemType
+
+export type ItemRoutes = inferRouterOutputs<MenuItemsRouterType>;
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
+export type ItemMutateProps = ItemRoutes["update"] | ItemRoutes["create"];
+
 export const ItemSchemaValid = z.object({
   id: z
     .string()

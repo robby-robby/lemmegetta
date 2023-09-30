@@ -14,10 +14,15 @@ export const SaveState = {
 export type SaveStates = (typeof SaveState)[keyof typeof SaveState];
 
 export type SaveStatusType = (typeof TRPCStatus)[keyof typeof TRPCStatus];
+export const SaveStatus: SaveStatusRes = TRPCStatus as SaveStatusRes;
+
+export type SaveStatusRes = {
+  [k in keyof typeof TRPCStatus]: (typeof TRPCStatus)[k] & SaveStatusType;
+};
 
 const AlertIcon = () => (
   <div className="flex justify-center">
-    <FiAlertTriangle color="red" size={50} />
+    <FiAlertTriangle color="pink" size={50} />
   </div>
 );
 
@@ -35,30 +40,32 @@ const CheckIcon = () => (
  * may be sufficient.
  **/
 
-export const useSaveModal = (): {
-  open: () => void;
-  close: () => void;
-  state: SaveStates;
-  message: string;
-  setMessage: (message: string) => void;
-  status: SaveStatusType;
-  setStatus: (status: SaveStatusType) => void;
-  reset: () => void;
-  setState: (state: SaveStates) => void;
-} => {
+export const useSaveModal = () => {
   const [state, setState] = useState<SaveStates>(false);
   const [status, setStatus] = useState<SaveStatusType>(TRPCStatus.idle);
   const [message, setMessage] = useState<string>("");
   const reset = () => {
     setMessage("");
-    setStatus(TRPCStatus.idle);
+    // setStatus(TRPCStatus.idle);
   };
   const close = () => {
     setState(SaveState.close);
   };
-  const open = () => {
-    setState(SaveState.open);
-  };
+
+  const _openWithStatus =
+    (s: SaveStatusType = SaveStatus.idle) =>
+    (m = "...") => {
+      setState(SaveState.open);
+      setMessage(m);
+      setStatus(s);
+    };
+
+  // const open = (s: SaveStatusType = SaveStatus.idle) => _openWithStatus(s);
+  const open = _openWithStatus(SaveStatus.idle);
+  const success = _openWithStatus(SaveStatus.success);
+  const error = _openWithStatus(SaveStatus.error);
+  const loading = _openWithStatus(TRPCStatus.loading);
+
   useEffect(() => {
     if (state == SaveState.close) reset();
   }, [state]);
@@ -66,12 +73,16 @@ export const useSaveModal = (): {
   return {
     open,
     close,
+    success,
+    error,
+    loading,
     reset,
     state,
     message,
     setMessage,
     setState,
-    status,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    status: status as SaveStatusType,
     setStatus,
   };
 };
@@ -81,8 +92,7 @@ type Props = {
   status: SaveStatusType;
   state: SaveStates;
   close: () => void;
-
-  message?: string;
+  message: string;
 };
 
 export const SaveModal: React.FC<Props> = ({
@@ -92,7 +102,7 @@ export const SaveModal: React.FC<Props> = ({
   stickyOpen = true,
   message,
 }) => {
-  const color = status === TRPCStatus.success ? "green" : "red";
+  const color = status === TRPCStatus.success ? "green" : "pink";
   const [inputRef, setInputFocus] = useButtonFocus();
   const onClose = () => {
     if (status !== TRPCStatus.loading || !stickyOpen) {
@@ -109,14 +119,14 @@ export const SaveModal: React.FC<Props> = ({
     <div className={`${state === SaveState.open ? "" : "hidden"}`}>
       <div
         tabIndex={-1}
-        className="fixed left-0 right-0 top-0 z-50 flex h-full max-h-full justify-center overflow-y-auto overflow-x-hidden bg-gray-500/75 p-4 align-middle md:inset-0"
+        className="fixed left-0 right-0 top-0 z-50 flex h-full max-h-full justify-center overflow-y-auto overflow-x-hidden bg-slate-500/75 p-4 align-middle md:inset-0"
       >
         <div className="relative max-h-full w-full max-w-md">
           <div className="relative rounded-lg bg-white shadow">
             <button
               onClick={onClose}
               type="button"
-              className="absolute right-2.5 top-3 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200"
+              className="absolute right-2.5 top-3 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-slate-400 hover:bg-slate-200"
               data-modal-hide="popup-modal"
             >
               <svg
@@ -137,16 +147,19 @@ export const SaveModal: React.FC<Props> = ({
               <span className="sr-only">Close modal</span>
             </button>
             <div className="p-6 text-center">
-              {status === TRPCStatus.success ? <CheckIcon /> : null}
+              {/* {status === TRPCStatus.success ? <CheckIcon /> : null} */}
+              {status === TRPCStatus.success ? (
+                <div className="text-6xl">🤘</div>
+              ) : null}
               {status === TRPCStatus.error ? <AlertIcon /> : null}
               {status === TRPCStatus.loading ? <Spinner /> : null}
-              <h3 className="mb-5 text-lg font-normal text-gray-500">
-                {status === TRPCStatus.success ? "Changes Saved" : null}
-                {status === TRPCStatus.error ? "Error updating :(" : null}
-                {status === TRPCStatus.loading ? "Loading..." : null}
-              </h3>
+              {/* <h3 className="mb-5 pb-5 pt-5 text-lg font-normal uppercase text-slate-500">
+                {status === TRPCStatus.success ? "Changes Saved 👍" : null}
+                {status === TRPCStatus.error ? "Error Saving 🙁" : null}
+                {status === TRPCStatus.loading ? "Loading 🌀" : null}
+              </h3> */}
               {message ? (
-                <pre className="m-10 text-sm text-gray-500">{message}</pre>
+                <pre className="m-10 text-sm text-slate-500">{message}</pre>
               ) : null}
               <button
                 data-modal-hide="popup-modal"
@@ -155,7 +168,7 @@ export const SaveModal: React.FC<Props> = ({
                 ref={inputRef}
                 disabled={status === TRPCStatus.loading}
                 className={`rounded-lg border border-${color}-500 bg-${color}-500 px-5 py-2.5 text-sm font-medium text-white
-  hover:bg-${color}-600 hover:text-white focus:z-10 focus:outline-none focus:ring-4 focus:ring-${color}-500 disabled:border-none disabled:bg-gray-400`}
+  hover:bg-${color}-600 hover:text-white focus:z-10 focus:outline-none focus:ring-4 focus:ring-${color}-500 disabled:border-none disabled:bg-slate-400`}
               >
                 Ok
               </button>

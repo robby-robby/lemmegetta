@@ -8,7 +8,7 @@ import { TRPCStatus } from "~/utils/TRPCStatus";
 export type ItemsRPCAction = "create" | "update" | "delete";
 
 export function useItemsRPC(
-  onStatusChange: (
+  onStatusChange?: (
     status: SaveStatusType,
     action: ItemsRPCAction
   ) => void | ((status: SaveStatusType) => void)
@@ -26,7 +26,7 @@ export function useItemsRPC(
   }, [itemsQuery.data, itemsQuery.status]);
 
   useEffect(() => {
-    if (itemsMuCreate.status !== TRPCStatus.idle) {
+    if (itemsMuCreate.status !== TRPCStatus.idle && onStatusChange) {
       onStatusChange(itemsMuCreate.status, "create");
     }
     if (itemsMuCreate.status === TRPCStatus.success) {
@@ -35,7 +35,7 @@ export function useItemsRPC(
   }, [itemsMuCreate.status]);
 
   useEffect(() => {
-    if (itemsMuUpdate.status !== TRPCStatus.idle) {
+    if (itemsMuUpdate.status !== TRPCStatus.idle && onStatusChange) {
       onStatusChange(itemsMuUpdate.status, "update");
     }
     if (itemsMuUpdate.status === TRPCStatus.success) {
@@ -44,7 +44,7 @@ export function useItemsRPC(
   }, [itemsMuUpdate.status]);
 
   useEffect(() => {
-    if (itemsMuDelete.status !== TRPCStatus.idle) {
+    if (itemsMuDelete.status !== TRPCStatus.idle && onStatusChange) {
       onStatusChange(itemsMuDelete.status, "delete");
     }
     if (itemsMuDelete.status === TRPCStatus.success) {

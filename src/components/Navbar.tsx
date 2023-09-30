@@ -2,6 +2,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+const LINKS = {
+  menu: "/admin/menu",
+  payments: "/admin/payments",
+};
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -9,16 +14,16 @@ export default function Navbar() {
   const isActive = (path: string) => router.pathname === path;
 
   return (
-    <nav className="bg-gray-800">
+    <nav className="mb-8 bg-gradient-to-r from-indigo-600 to-pink-500">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 <Link
-                  href="/admin/menu"
-                  className={`text-md rounded-md px-3 py-2 font-medium hover:text-blue-500 ${
-                    isActive("/admin/menu")
+                  href={LINKS.menu}
+                  className={`text-md rounded-md px-3 py-2 font-medium hover:text-white ${
+                    isActive(LINKS.menu)
                       ? "bold text-blue-300 underline"
                       : "text-white"
                   }`}
@@ -26,9 +31,9 @@ export default function Navbar() {
                   Menu
                 </Link>
                 <Link
-                  href="/admin/payments"
-                  className={`text-md rounded-md px-3 py-2 font-medium  hover:text-blue-500 ${
-                    isActive("/admin/payments")
+                  href={LINKS.payments}
+                  className={`text-md rounded-md px-3 py-2 font-medium  hover:text-white ${
+                    isActive(LINKS.payments)
                       ? "bold text-blue-300 underline"
                       : "text-white"
                   }`}
@@ -70,13 +75,13 @@ export default function Navbar() {
         <div className="md:hidden">
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
             <Link
-              href="/menu"
+              href={LINKS.menu}
               className="block rounded-md px-3 py-2 text-base font-medium text-white"
             >
               Menu
             </Link>
             <Link
-              href="/admin/payments"
+              href={LINKS.payments}
               className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:text-white"
             >
               Settings

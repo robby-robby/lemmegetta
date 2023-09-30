@@ -7,9 +7,10 @@ import {
 import {
   type PaymentCards,
   PaymentCardsDefault,
-  PaymentCardsSchema,
+  PaymentCardsSchemaValid,
 } from "~/models/cards";
-import { never } from "zod";
+
+export type PaymentRouterType = typeof paymentSettingsRouter;
 
 const serializeSettings = (cards: PaymentCards) => {
   const result = [];
@@ -56,7 +57,9 @@ export const paymentSettingsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const payments = await ctx.prisma.paymentSettings.findMany();
     // await new Promise((rs) => setTimeout(rs, 3000));
+
     const result = {};
+    // console.log(payments);
     if (!payments.length) return PaymentCardsDefault;
     for (const p of payments) {
       const key = p.name;
@@ -76,7 +79,7 @@ export const paymentSettingsRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure
-    .input(PaymentCardsSchema)
+    .input(PaymentCardsSchemaValid)
     .mutation(async ({ input, ctx }) => {
       const serialized = serializeSettings(input);
       // await new Promise((rs) => setTimeout(rs, 3000));

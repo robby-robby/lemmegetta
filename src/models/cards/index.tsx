@@ -1,3 +1,5 @@
+import { type inferRouterOutputs } from "@trpc/server";
+import { type PaymentRouterType } from "~/server/api/routers/payments";
 import { z } from "zod";
 
 export type PaymentCardInfo = {
@@ -5,6 +7,35 @@ export type PaymentCardInfo = {
   username: string;
   urlTemplate: string;
 };
+
+export type PaymentRoutes = inferRouterOutputs<PaymentRouterType>;
+// export type PaymentMutateProps = PaymentRoutes["update"];
+// export type PaymentMutateProps = PaymentCardInfo;
+export type PaymentMutateProps = PaymentCards;
+
+export const PaymentCardsSchemaValid = z.object({
+  CashApp: z.object({
+    isEnabled: z.boolean(),
+    username: z.string().refine((data) => data !== "", {
+      message: "username is a required field",
+    }),
+    urlTemplate: z.string().refine((data) => data !== "", {
+      message: "urlTemplate is a required field",
+    }),
+  }),
+  Venmo: z.object({
+    isEnabled: z.boolean(),
+    username: z.string().refine((data) => data !== "", {
+      message: "username is a required field",
+    }),
+    urlTemplate: z.string().refine((data) => data !== "", {
+      message: "urlTemplate is a required field",
+    }),
+  }),
+  Cash: z.object({
+    isEnabled: z.boolean(),
+  }),
+});
 
 export const PaymentCardsSchema = z.object({
   CashApp: z.object({

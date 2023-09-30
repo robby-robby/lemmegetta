@@ -6,12 +6,20 @@ import { SaveModal, useSaveModal } from "~/components/SaveModal";
 // import { useEscapeModal } from "~/hooks/useEscapeModal";
 import { PaymentsCardsForm } from "~/components/PaymentsCardsForm";
 import { usePaymentCardsRPC } from "~/models/cards/usePaymentCardsRPC";
+import { FormFieldErrorsObject, isValidationError } from "~/utils/misc";
+import { useVxErrors } from "~/hooks/useVxErrors";
+import { PaymentCardInfo, PaymentMutateProps } from "~/models/cards";
 
 export default function Payments() {
   const {
     open: saveModalOpen,
+    success: saveModalSuccess,
+    error: saveModalError,
+    loading: saveModalLoading,
     close: saveModalClose,
+    message: saveModalMessage,
     state: saveModalState,
+    status: saveModalStatus,
   } = useSaveModal();
 
   // useEscapeModal(saveModalClose);
@@ -20,27 +28,50 @@ export default function Payments() {
     cards,
     setProperty,
     reset,
-    update: handleSubmit,
+    updateAsync,
     paymentsMuUpdate: paymentsMutation,
-  } = usePaymentCardsRPC({
-    onSubmit: saveModalOpen,
-  });
+  } = usePaymentCardsRPC();
+
+  const {
+    vxErrors: vxErrors,
+    vxErrorsSet: vxErrorsSet,
+    vxErrorsReset: vxErrorsReset,
+  } = useVxErrors<PaymentMutateProps>();
+
+  const handleSubmit = async () => {
+    try {
+      saveModalLoading("...");
+      await updateAsync(cards);
+      saveModalSuccess("Payment settings updated");
+    } catch (error) {
+      console.log(JSON.stringify(error, null, 4));
+      if (isValidationError<PaymentMutateProps>(error)) {
+        saveModalClose();
+        return vxErrorsSet(error.data.validationError);
+      } else {
+        saveModalError("Something went wrong.");
+      }
+    }
+  };
 
   return (
     <>
       <SaveModal
         state={saveModalState}
         close={saveModalClose}
-        status={paymentsMutation.status}
+        message={saveModalMessage}
+        status={saveModalStatus}
       />
       <div className="min-h-screen items-center justify-center bg-gray-100">
-        <h1 className="mb-4 pt-4 text-center text-3xl font-bold">
+        <h1 className="mb-4 text-center text-3xl uppercase text-slate-800 ">
           Payment Settings
         </h1>
         <div className="flex items-start justify-center bg-gray-100">
           <div className="m-4 w-full max-w-lg rounded-lg bg-white shadow-md sm:p-3 ">
             <PaymentsCardsForm
               reset={reset}
+              vxErrors={vxErrors}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               handleSubmit={handleSubmit}
               cards={cards}
               setProperty={setProperty}

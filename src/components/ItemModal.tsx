@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-// import { useEscapeModal } from "~/hooks/useEscapeModal";
-import { NullItem, type ItemType } from "~/models/items";
-import { FormFieldErrorsObject } from "~/utils/misc";
+// import { type VxErrorsType } from "~/hooks/useVxErrors";
+import { type ItemMutateProps, NullItem, type ItemType } from "~/models/items";
+import { type FormFieldErrorsObject } from "~/utils/misc";
 
-interface Props {
+interface ItemModalProps {
   title?: string;
   show: boolean;
   onClose: () => void;
   onSubmit: (formData: ItemType) => void;
   defaultItem?: ItemType;
-  vxErrors?: FormFieldErrorsObject;
+  vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
 }
 
 export const ItemModalState = {
@@ -39,13 +39,15 @@ export const ItemModalForm = ({
   close: () => void;
   submit: (i: ItemType) => void;
   item: ItemType;
-  vxErrors?: FormFieldErrorsObject;
+  vxErrors?: FormFieldErrorsObject<ItemMutateProps>;
 }) => {
+  //TODO: get proper types for vxErrors
+  // http://trpc.io/docs/client/vanilla/infer-types
   const { fieldErrors, formErrors } = vxErrors ?? {};
   return (
     <div className="mt-5">
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-600">Name</label>
+        <label className="block text-sm font-medium text-slate-600">Name</label>
         <input
           type="text"
           name="name"
@@ -53,15 +55,15 @@ export const ItemModalForm = ({
           onChange={inputChange}
           required
           className={`mt-1 w-full rounded-md border p-2 ${
-            fieldErrors?.name ? "border-red-500" : ""
+            fieldErrors?.name ? "border-pink-500" : ""
           }`}
         />
         {fieldErrors?.name && (
-          <p className="mt-1 text-xs text-red-500">{fieldErrors.name[0]}</p>
+          <p className="mt-1 text-xs text-pink-500">{fieldErrors.name[0]}</p>
         )}
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-600">
+        <label className="block text-sm font-medium text-slate-600">
           Description
         </label>
         <input
@@ -71,17 +73,17 @@ export const ItemModalForm = ({
           onChange={inputChange}
           required
           className={`mt-1 w-full rounded-md border p-2 ${
-            fieldErrors?.description ? "border-red-500" : ""
+            fieldErrors?.description ? "border-pink-500" : ""
           }`}
         />
         {fieldErrors?.description && (
-          <p className="mt-1 text-xs text-red-500">
+          <p className="mt-1 text-xs text-pink-500">
             {fieldErrors?.description[0]}
           </p>
         )}
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-600">
+        <label className="block text-sm font-medium text-slate-600">
           Short Code
         </label>
         <input
@@ -91,17 +93,19 @@ export const ItemModalForm = ({
           onChange={inputChange}
           required
           className={`mt-1 w-full rounded-md border p-2 ${
-            fieldErrors?.shortCode ? "border-red-500" : ""
+            fieldErrors?.shortCode ? "border-pink-500" : ""
           }`}
         />
         {fieldErrors?.shortCode && (
-          <p className="mt-1 text-xs text-red-500">
+          <p className="mt-1 text-xs text-pink-500">
             {fieldErrors?.shortCode[0]}
           </p>
         )}
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-600">Price</label>
+        <label className="block text-sm font-medium text-slate-600">
+          Price
+        </label>
         <input
           type="number"
           step="0.01"
@@ -110,15 +114,17 @@ export const ItemModalForm = ({
           onChange={inputChange}
           required
           className={`mt-1 w-full rounded-md border p-2 ${
-            fieldErrors?.price ? "border-red-500" : ""
+            fieldErrors?.price ? "border-pink-500" : ""
           }`}
         />
         {fieldErrors?.price && (
-          <p className="mt-1 text-xs text-red-500">{fieldErrors?.price[0]}</p>
+          <p className="mt-1 text-xs text-pink-500">{fieldErrors?.price[0]}</p>
         )}
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-600">Image</label>
+        <label className="block text-sm font-medium text-slate-600">
+          Image
+        </label>
         <input
           type="file"
           name="image"
@@ -130,7 +136,7 @@ export const ItemModalForm = ({
       {formErrors && formErrors.length > 0 && (
         <div className="mb-4">
           {formErrors?.map((error, index) => (
-            <p key={index} className="mt-1 text-xs text-red-500">
+            <p key={index} className="mt-1 text-xs text-pink-500">
               {error}
             </p>
           ))}
@@ -140,23 +146,23 @@ export const ItemModalForm = ({
         <button
           type="button"
           onClick={close}
-          className="mr-2 rounded bg-gray-400 px-4 py-2 font-bold text-white hover:bg-gray-500"
+          className="mr-2 rounded bg-slate-400 px-4 py-2 font-bold text-white hover:bg-slate-500"
         >
-          Cancel
+          ❌ Cancel
         </button>
         <button
           type="button"
           onClick={() => submit(item)}
-          className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+          className="rounded bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-700"
         >
-          Submit
+          Submit 🏀
         </button>
       </div>
     </div>
   );
 };
 
-export const ItemModal: React.FC<Props> = ({
+export const ItemModal: React.FC<ItemModalProps> = ({
   show,
   onClose,
   onSubmit,
@@ -194,7 +200,7 @@ export const ItemModal: React.FC<Props> = ({
       <div className="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div
-            className="absolute inset-0 bg-gray-500 opacity-75"
+            className="absolute inset-0 bg-slate-500 opacity-75"
             onClick={onClose}
           ></div>
         </div>
@@ -209,7 +215,7 @@ export const ItemModal: React.FC<Props> = ({
             <div className="sm:flex sm:items-start">
               <div className="mt-3 w-full text-center sm:ml-4 sm:mt-0 sm:text-left">
                 <h3
-                  className="text-lg font-medium leading-6 text-gray-900"
+                  className="text-lg font-medium leading-6 text-slate-900"
                   id="modal-title"
                 >
                   {title}

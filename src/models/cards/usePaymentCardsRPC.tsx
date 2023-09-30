@@ -5,13 +5,9 @@ import { type SaveStatusType } from "~/components/SaveModal";
 import { TRPCStatus } from "~/utils/TRPCStatus";
 import { type PaymentPropSetter } from "~/components/PaymentCard";
 
-export function usePaymentCardsRPC({
-  onSubmit,
-  onStatusChange,
-}: {
-  onSubmit?: (pc?: PaymentCards) => void;
-  onStatusChange?: (status: SaveStatusType) => void;
-} = {}) {
+export function usePaymentCardsRPC(
+  onStatusChange?: (status: SaveStatusType) => void
+) {
   const [cards, setCards] = React.useState<PaymentCards>({
     ...PaymentCardsDefault,
   });
@@ -32,12 +28,10 @@ export function usePaymentCardsRPC({
   const paymentsQuery = api.paymentSettings.getAll.useQuery();
   const update = () => {
     paymentsMuUpdate.mutate(cards);
-    if (onSubmit) onSubmit(cards);
   };
 
   useEffect(() => {
     if (paymentsQuery.status === TRPCStatus.success) {
-      //TODO dont hardcode string use save type
       if (paymentsQuery.data !== undefined) setCards(paymentsQuery.data);
     }
   }, [paymentsQuery.data, paymentsQuery.status]);
@@ -53,6 +47,7 @@ export function usePaymentCardsRPC({
     setProperty,
     reset,
     update,
+    updateAsync: paymentsMuUpdate.mutateAsync,
     paymentsMuUpdate,
   };
 }
