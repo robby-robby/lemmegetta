@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "~/utils/api";
 import { type ItemType } from "~/models/items";
 import { type SaveStatusType } from "~/components/SaveModal";
@@ -16,6 +16,14 @@ export function useItemsRPC(
   const itemsMuCreate = api.menuItems.create.useMutation();
   const itemsMuUpdate = api.menuItems.update.useMutation();
   const itemsMuDelete = api.menuItems.delete.useMutation();
+  const itemsById = useMemo(
+    () =>
+      items.reduce((acc, item) => {
+        acc[item.id] = item;
+        return acc;
+      }, {} as Record<ItemType["id"], ItemType>),
+    [items]
+  );
 
   useEffect(() => {
     if (itemsQuery.status === TRPCStatus.success) {
@@ -72,6 +80,7 @@ export function useItemsRPC(
 
   return {
     items,
+    itemsById,
     createAsync,
     updateAsync,
     removeAsync,

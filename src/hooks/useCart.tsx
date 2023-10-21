@@ -6,90 +6,111 @@ import { type ItemType } from "~/models/items";
 import { filterFirst } from "./filterFirst";
 
 type Store = {
-  list: ItemType[];
-  addToList: (item: ItemType) => void;
+  cart: string[];
+  setList: (cart: Store["cart"]) => void;
+  emptyList: () => void;
+  addToList: (id: string) => void;
   removeFromList: (id: string) => void;
 };
 
 export const useStore = create(
   persist<Store>(
     (set) => ({
-      list: [],
-      addToList: (item) =>
+      cart: [],
+      setList: (cart: Store["cart"]) => set(() => ({ cart: cart })),
+      emptyList: () => set(() => ({ cart: [] })),
+      addToList: (id) =>
         set((state) => {
-          return { list: [...state.list, item] };
+          return { cart: [...state.cart, id] };
         }),
       removeFromList: (itemId) =>
         set((state) => ({
-          list: filterFirst(state.list, ({ id }) => id === itemId),
+          cart: filterFirst(state.cart, (id) => id === itemId),
         })),
-      setList: (list: Store["list"]) => set(() => ({ list })),
     }),
     {
       name: "cart-storage", // this must be a unique name
+      version: 3,
       storage: createJSONStorage(() => sessionStorage),
       skipHydration: true,
     }
   )
 );
 
-const useList = () => useStore((state) => state.list);
+const useEmptyCart = () => useStore((state) => state.emptyList);
+const useList = () => useStore((state) => state.cart);
 const useAddToList = () => useStore((state) => state.addToList);
 const useRemoveFromList = () => useStore((state) => state.removeFromList);
-const useFilteredList = (filterId: string) => {
-  const list = useList();
+const useFilterList = (filterId: string) => {
+  const cart = useList();
   return useMemo(
-    () => (filterId === "" ? list : list.filter((l) => l.id === filterId)),
-    [filterId, list]
+    () => (filterId === "" ? cart : cart.filter((id) => id === filterId)),
+    [filterId, cart]
   );
 };
 
-/*
-  id: string;{
-    count: number;
-    total: number;
-    item: ItemType;
-  }
-*/
-type ItemizedList = Map<
-  string,
-  { total: number; count: number; item: ItemType }
->;
+export const useCart = (itemsById: Record<ItemType["id"], ItemType> = {}) => {
+  const cart = useList();
 
-const useItemizedList = () => {
-  const list = useList();
-  return useMemo(() => {
-    const map = new Map<string, typeof list>();
-    for (const item of list) {
-      map.set(item.id, map.get(item.id) ?? []);
-    }
-  }, [list]);
-};
-
-export const useCart = (id = "") => {
-  const list = useList();
   const [loading, setLoading] = useState(true);
+  //TODO clear cart if ids do not exist
   useEffect(() => {
     void (async function () {
       await useStore.persist.rehydrate();
       setLoading(false);
     })();
   }, []);
-  const itemizedList = useItemizedList();
+  const empty = useEmptyCart();
   const add = useAddToList();
   const del = useRemoveFromList();
-  const total = list.reduce((p, item) => item.price + p, 0);
-  const count = useFilteredList(id).length;
+  const total = useMemo(() => {
+    return cart.reduce((p, id) => (itemsById[id]?.price ?? 0) + p, 0);
+  }, [cart, itemsById]);
+  const count = cart.length;
+  const uniqIds = useMemo(() => [...new Set(cart)], [cart]);
+  const countById = useMemo(() => {
+    return cart.reduce((p, id) => {
+      p[id] = (p[id] ?? 0) + 1;
+      return p;
+    }, {} as Record<string, number>);
+  }, [cart]);
+  const itemsWithCountAndTotal = useMemo(() => {
+    return uniqIds.map((id) => {
+      const item = itemsById[id] ?? { price: 0 };
+      const count = countById[id];
+      const total = (item.price ?? 0) * (count ?? 0);
+      return { ...item, count, total } as ItemType & {
+        count: number;
+        total: number;
+      };
+    });
+  }, [uniqIds, countById, itemsById]);
+
+  const sortedItemsWithCountAndTotal = useMemo(
+    () =>
+      itemsWithCountAndTotal.sort((a, b) => {
+        return 1;
+        // if (a === null || a?.id === null) return 1;
+        // return a.id.localeCompare(b.id);
+      }),
+    [itemsWithCountAndTotal]
+  );
+
   return useMemo(
     () => ({
       count,
       total,
-      itemizedList,
-      list,
+      uniqIds,
+      countById,
+      empty,
+      cart,
+      itemsWithCountAndTotal,
+      sortedItemsWithCountAndTotal,
+      useFilterList,
       add,
       del,
       loading,
     }),
-    [list, add, del, total, count, loading]
+    [cart, add, del, total, count, loading]
   );
 };

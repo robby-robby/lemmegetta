@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BsCheckCircle } from "react-icons/bs";
 import { FiAlertTriangle } from "react-icons/fi";
 import { useButtonFocus } from "~/hooks/useFocus";
-import { Spinner } from "./Spinner";
+import { LemonSpinner, Spinner } from "~/components/Spinner";
 import { TRPCStatus } from "../utils/TRPCStatus";
 
 export const SaveState = {
@@ -46,7 +46,6 @@ export const useSaveModal = () => {
   const [message, setMessage] = useState<string>("");
   const reset = () => {
     setMessage("");
-    // setStatus(TRPCStatus.idle);
   };
   const close = () => {
     setState(SaveState.close);
@@ -118,7 +117,6 @@ export const SaveModal: React.FC<Props> = ({
     if (status !== TRPCStatus.loading || !stickyOpen) {
       close();
     }
-    // setMessage("");
   };
   useEffect(() => {
     if (status !== TRPCStatus.loading) {
@@ -157,19 +155,16 @@ export const SaveModal: React.FC<Props> = ({
               <span className="sr-only">Close modal</span>
             </button>
             <div className="p-6 text-center">
-              {/* {status === TRPCStatus.success ? <CheckIcon /> : null} */}
-              {status === TRPCStatus.success ? (
-                <div className="text-6xl">🤘</div>
-              ) : null}
-              {status === TRPCStatus.error ? <AlertIcon /> : null}
-              {status === TRPCStatus.loading ? <Spinner /> : null}
-              {/* <h3 className="mb-5 pb-5 pt-5 text-lg font-normal uppercase text-slate-500">
-                {status === TRPCStatus.success ? "Changes Saved 👍" : null}
-                {status === TRPCStatus.error ? "Error Saving 🙁" : null}
-                {status === TRPCStatus.loading ? "Loading 🌀" : null}
-              </h3> */}
+              <div className="flex justify-center">
+                {/* {status === TRPCStatus.success ? <CheckIcon /> : null} */}
+                {status === TRPCStatus.success ? (
+                  <div className="text-6xl">🤘</div>
+                ) : null}
+                {status === TRPCStatus.error ? <AlertIcon /> : null}
+                {status === TRPCStatus.loading ? <LemonSpinner /> : null}
+              </div>
               {message ? (
-                <pre className="m-10 whitespace-break-spaces text-sm text-slate-500">
+                <pre className="m-5 whitespace-break-spaces text-sm text-slate-500">
                   {message}
                 </pre>
               ) : null}

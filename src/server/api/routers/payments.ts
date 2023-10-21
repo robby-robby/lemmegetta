@@ -22,53 +22,19 @@ const serializeSettings = (cards: PaymentCards) => {
   return result;
 };
 
-/*
-
-paymentscards object:
-
- PaymentCardsDefault = Object.freeze({
-  Cash: {
-    isEnabled: false,
-  },
-  CashApp: {
-    isEnabled: false,
-    username: "",
-    urlTemplate: "https://cash.app/$<USER_NAME>/<AMOUNT>",
-  },
-  Venmo: {
-    isEnabled: false,
-    username: "",
-    urlTemplate:
-      "https://venmo.com/<USER_NAME>?txn=pay&note=<NOTE>&amount=<AMOUNT>",
-  },
-});
-*/
 export const paymentSettingsRouter = createTRPCRouter({
-  /*
-  // prisma schema:
-  model PaymentSettings {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name      String
-    value     String
-  }
-*/
   getAll: publicProcedure.query(async ({ ctx }) => {
     const payments = await ctx.prisma.paymentSettings.findMany();
-    // await new Promise((rs) => setTimeout(rs, 3000));
-
     const result = {};
-    // console.log(payments);
     if (!payments.length) return PaymentCardsDefault;
     for (const p of payments) {
       const key = p.name;
       try {
-        //@ts-ignore
+        // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         result[key] = JSON.parse(p.value);
       } catch (e) {
-        //quietly fail
+        console.error(e);
       }
     }
     return result as typeof PaymentCardsDefault;
@@ -82,7 +48,7 @@ export const paymentSettingsRouter = createTRPCRouter({
     .input(PaymentCardsSchemaValid)
     .mutation(async ({ input, ctx }) => {
       const serialized = serializeSettings(input);
-      // await new Promise((rs) => setTimeout(rs, 3000));
+      await new Promise((rs) => setTimeout(rs, 20000));
       return ctx.prisma.$transaction(
         serialized.map((item) => {
           return ctx.prisma.paymentSettings.upsert({
@@ -93,78 +59,4 @@ export const paymentSettingsRouter = createTRPCRouter({
         })
       );
     }),
-
-  // update: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //       value: z.string(),
-  //     })
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     return ctx.prisma.paymentSettings.update({
-  //       where: { name: input.name },
-  //       data: { name: input.name, value: input.value },
-  //     });
-  //   }),
-
-  // upsertMany: protectedProcedure
-  //   .input(
-  //     z.array(
-  //       z.object({
-  //         name: z.string(),
-  //         value: z.string(),
-  //       })
-  //     )
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     return ctx.prisma.$transaction(
-  //       input.map((item) => {
-  //         return ctx.prisma.paymentSettings.upsert({
-  //           create: { name: item.name, value: item.value },
-  //           update: { value: item.value },
-  //           where: { name: item.name },
-  //         });
-  //       })
-  //     );
-  //   }),
-  // upsert: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //       value: z.string(),
-  //     })
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     return ctx.prisma.paymentSettings.upsert({
-  //       where: { name: input.name },
-  //       update: { value: input.value },
-  //       create: { name: input.name, value: input.value },
-  //     });
-  //   }),
-
-  // create: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //       value: z.string(),
-  //     })
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     return ctx.prisma.paymentSettings.create({
-  //       data: { name: input.name, value: input.value },
-  //     });
-  //   }),
-
-  // delete: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       name: z.string(),
-  //     })
-  //   )
-  //   .mutation(({ input, ctx }) => {
-  //     return ctx.prisma.paymentSettings.delete({
-  //       where: { name: input.name },
-  //     });
-  //   }),
 });

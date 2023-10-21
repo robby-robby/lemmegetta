@@ -1,8 +1,47 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import React, { ReactElement } from "react";
+import { ReactNode, useState } from "react";
 import { BrandHead } from "~/components/BrandHead";
 import { LINKS } from "~/components/links";
+interface NavLinksParentProps {
+  onClick: () => void;
+  children: ReactElement<{ onClick: () => void }>[];
+}
+const NavLinksMobileParent: React.FC<NavLinksParentProps> = ({
+  onClick,
+  children,
+}) => {
+  return (
+    <>
+      {React.Children.map(children, (child) =>
+        React.isValidElement(child)
+          ? React.cloneElement(child as ReactElement<{ onClick: () => void }>, {
+              onClick,
+            })
+          : child
+      )}
+    </>
+  );
+};
+
+const NavLinkMobile = ({
+  href,
+  name,
+  onClick,
+}: {
+  href: string;
+  name: string;
+  onClick?: () => void;
+}) => (
+  <Link
+    href={href}
+    onClick={onClick}
+    className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:text-white"
+  >
+    {name}
+  </Link>
+);
 
 const NavLink = ({ name, href }: { name: string; href: string }) => {
   const router = useRouter();
@@ -34,8 +73,8 @@ export function AdminNavbar() {
             <div className="ml-2 flex w-full justify-between align-baseline">
               <BrandHead />
               <div className="hidden sm:flex">
-                <NavLink name="View" href={LINKS.view} />
-                <NavLink name="Menu" href={LINKS.menu} />
+                <NavLink name="Preview Menu" href={LINKS.adminView} />
+                <NavLink name="Edit Menu" href={LINKS.adminMenu} />
                 <NavLink name="Payments" href={LINKS.payments} />
               </div>
             </div>
@@ -70,20 +109,11 @@ export function AdminNavbar() {
         {isOpen && (
           <div className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-              <Link
-                onClick={() => setIsOpen(!isOpen)}
-                href={LINKS.menu}
-                className="block rounded-md px-3 py-2 text-base font-medium text-white"
-              >
-                Menu
-              </Link>
-              <Link
-                onClick={() => setIsOpen(!isOpen)}
-                href={LINKS.payments}
-                className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:text-white"
-              >
-                Settings
-              </Link>
+              <NavLinksMobileParent onClick={() => setIsOpen(false)}>
+                <NavLinkMobile name="Menu" href={LINKS.adminMenu} />
+                <NavLinkMobile name="Settings" href={LINKS.payments} />
+                <NavLinkMobile name="Preview Menu" href={LINKS.menu} />
+              </NavLinksMobileParent>
             </div>
           </div>
         )}

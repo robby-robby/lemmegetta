@@ -7,6 +7,9 @@ import { useItemsRPC } from "~/models/items/useItemsRPC";
 import ShoppingCartButton from "~/components/ShoppingCartBtn";
 import { useCart } from "~/hooks/useCart";
 import { Show } from "./Show";
+import { PlusSign } from "~/components/PlusSign";
+import { MinusSign } from "~/components/MinusSign";
+import { ifClass } from "~/components/ifClass";
 
 function MenuPage() {
   const { items } = useItemsRPC();
@@ -49,10 +52,9 @@ function ItemsGrid({ items }: { items: ItemType[] }): ReactElement {
   );
 }
 
-const ifClass = (condition: boolean, className: string) =>
-  condition ? className : "";
 function Item({ item }: { item: ItemType }): ReactElement {
-  const { add, del, count } = useCart(item.id);
+  const { add, del, countById } = useCart();
+  const count = countById[item.id] ?? 0; //filterList(item.id).length;
 
   return (
     <div className="mb-4 w-full px-4 md:w-1/2 lg:w-1/3" key={item.id}>
@@ -77,8 +79,14 @@ function Item({ item }: { item: ItemType }): ReactElement {
             </button>
           </Show>
           <button
-            onClick={() => add(item)}
-            className="mx-1 rounded-lg bg-green-400 px-4 py-2 font-bold text-white hover:bg-green-500"
+            onClick={() => add(item.id)}
+            className={`mx-1 h-10 rounded-lg border-2 border-green-400 px-4 py-2 font-bold
+                      ${
+                        count === 0
+                          ? "bg-green-400 text-white hover:bg-green-500"
+                          : "bg-white text-green-400 hover:text-green-500"
+                      }
+                    `}
           >
             <PlusSign count={count} />
           </button>
@@ -99,35 +107,6 @@ function Item({ item }: { item: ItemType }): ReactElement {
     </div>
   );
 }
-const PlusSign = ({ count }: { count: number }) => {
-  if (count > 0) {
-    return <div className="w-6"> {count} </div>;
-  }
-  return (
-    <svg
-      className="h-6 w-6 fill-current"
-      stroke="white"
-      strokeWidth={4}
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M12 5V19M5 12H19" />
-    </svg>
-  );
-};
-
-const MinusSign = () => (
-  <svg
-    className="h-6 w-6 fill-current"
-    stroke="white"
-    strokeWidth={4}
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M5 12H19" />
-  </svg>
-);
-
 MenuPage.getLayout = function getLayout(page: ReactElement) {
   return <CustomerLayout>{page}</CustomerLayout>;
 };

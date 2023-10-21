@@ -1,17 +1,21 @@
-import React from "react";
+import { useEffect } from "react";
 
-export function useEscapeModal(onClose: () => void) {
-  React.useEffect(() => {
+export function useEscapeModal(...modalClosers: (() => void)[]) {
+  return useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        modalClosers.forEach((fn) => {
+          try {
+            fn();
+          } catch (e) {
+            console.error(e);
+          }
+        });
       }
     };
-
-    document.addEventListener("keydown", handleEscape, false);
-
+    document.addEventListener("keydown", handleEscape);
     return () => {
-      document.removeEventListener("keydown", handleEscape, false);
+      document.removeEventListener("keydown", handleEscape);
     };
-  }, [onClose]);
+  }, [modalClosers]);
 }

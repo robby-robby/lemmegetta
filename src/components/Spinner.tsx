@@ -1,3 +1,5 @@
+import Image from "next/image";
+import LemonSvg from "~/components/Lemon.svg";
 export const Spinner = () => (
   <div role="status">
     <svg
@@ -16,6 +18,20 @@ export const Spinner = () => (
         fill="currentFill"
       />
     </svg>
+    <span className="sr-only">Loading...</span>
+  </div>
+);
+
+export const LemonSpinner = () => (
+  <div role="status">
+    <Image
+      priority
+      className="animate-spin"
+      src={LemonSvg as string}
+      alt="LemmeGetta Logo"
+      width={40}
+      height={40}
+    />
     <span className="sr-only">Loading...</span>
   </div>
 );

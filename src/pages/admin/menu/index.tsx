@@ -16,55 +16,42 @@ import { useVxErrors } from "~/hooks/useVxErrors";
 export const DumbLoadingText = "..l.o.a.d.i.n.g..";
 function MenuPage() {
   const {
-    // open: saveModalOpen,
-    error: saveModalError,
     success: saveModalSuccess,
     loading: saveModalLoading,
     close: saveModalClose,
     state: saveModalState,
     status: saveModalStatus,
-    setMessage: saveModalSetMessage,
     message: saveModalMessage,
     toughError: saveModalToughError,
   } = useSaveModal();
 
-  const {
-    open: confirmModalOpen,
-    close: confirmModalClose,
-    state: confirmModalState,
-    confirmFor: confirmModalFor,
-    message: confirmModalMessage,
-    setMessage: confirmModalSetMessage,
-  } = useConfirmModal<string>();
-
-  useEscapeModal(confirmModalClose);
-
   const { open: addOpen, close: addClose, state: addState } = useItemModal();
   const { open: editOpen, close: editClose, state: editState } = useItemModal();
 
-  useEscapeModal(addClose);
-  useEscapeModal(editClose);
-
   const [addItem, setAddItem] = useState({ ...NullItem });
+  // const [removeItemId, setRemoveItemId] = useState<ItemType["id"]>("");
+  const [removeItemName, setRemoveItemName] = useState<ItemType["name"]>("");
   const addItemReset = () => setAddItem({ ...NullItem });
 
-  const { items, removeAsync, createAsync, updateAsync } = useItemsRPC();
+  const { items, removeAsync, createAsync, updateAsync, itemsById } =
+    useItemsRPC();
 
   const { editItem, editItemById } = useItemEditor(items);
 
-  const confirmAndDeleteItem = useCallback(
-    (itemId: string) => {
-      const i = items.find((item) => item.id === itemId);
-      const n = i?.name ?? "<Unknown>";
-      confirmModalSetMessage(`Delete item ${n}?`);
-      confirmModalOpen(itemId);
-    },
-    [items]
+  const {
+    open: confirmModalOpen,
+    escape: confirmModalClose,
+    state: confirmModalState,
+    handle: confirmModalHandle,
+  } = useConfirmModal(
+    (id?: ItemType["id"]) => onSubmitRemove(id!),
+    (itemId?: string) => setRemoveItemName(itemsById[itemId!]?.name ?? "")
   );
 
   const { vxErrors, vxErrorsReset, vxErrorsSet } =
     useVxErrors<ItemSchemaType>();
 
+  useEscapeModal(confirmModalClose, addClose, editClose);
   const onSubmitCreate = async (item: ItemType) => {
     try {
       saveModalLoading(DumbLoadingText);
@@ -123,9 +110,9 @@ function MenuPage() {
   return (
     <>
       <ConfirmModal
-        ok={() => onSubmitRemove(confirmModalFor)}
+        ok={confirmModalHandle}
+        message={`Delete item ${removeItemName}?`}
         close={confirmModalClose}
-        message={confirmModalMessage}
         state={confirmModalState}
       />
       <SaveModal
@@ -142,17 +129,20 @@ function MenuPage() {
             </h1>
             <div className="mb-3 flex justify-end">
               <button
-                className="rounded bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-700"
+                className="group relative rounded bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-700"
                 onClick={openAddItem}
               >
-                Add 🏀
+                Add{" "}
+                <span className="inline-block group-hover:animate-bounce">
+                  🏀
+                </span>
               </button>
             </div>
             <div className="flex flex-wrap">
               <ItemsGrid
                 items={items}
                 edit={openEditItem}
-                remove={confirmAndDeleteItem}
+                remove={confirmModalOpen}
               />
             </div>
           </div>

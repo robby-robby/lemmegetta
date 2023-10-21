@@ -1,14 +1,10 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useState } from "react";
-import ShoppingCartButton from "./ShoppingCartBtn";
-import LemonWheelSvg from "~/components/LemonWheel.svg";
 import { BrandHead } from "~/components/BrandHead";
 import { useCart } from "~/hooks/useCart";
 import { Show } from "~/pages/menu/Show";
-import Image from "next/image";
-import LemonSvg from "~/components/Lemon.svg";
 import { LINKS } from "./links";
+import { useItemsRPC } from "~/models/items/useItemsRPC";
 
 const Lemon = () => (
   <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">
@@ -23,26 +19,28 @@ function plural(word: string, count: number) {
 }
 
 function CheckoutButton({ className }: { className?: string }) {
-  const { list, total } = useCart();
-  const c =
+  const { itemsById } = useItemsRPC();
+  const { cart, total, count } = useCart(itemsById);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  className =
     className ??
     `text-md rounded-md border-2 border-white px-3 py-2 font-medium text-white`;
   return (
     <>
-      <Show when={list.length === 0}>
+      <Show when={cart.length === 0}>
         <div className="sm:hidden">
-          <div className={c}>
+          <div className={className}>
             <BrandHead />
           </div>
         </div>
       </Show>
-      <Show when={total > 0}>
-        <Link href={LINKS.checkout} className={c}>
-          {`${list.length} ${plural("item", list.length)} $${total.toFixed(
+      <Show when={count > 0}>
+        <Link href={LINKS.checkout} className={className}>
+          {`${cart.length} ${plural("item", cart.length)} $${total.toFixed(
             2
           )} - `}
           Checkout
-          <span className="absolute right-7 top-6 block animate-bounce sm:hidden">
+          <span className="absolute right-7 top-4 block animate-bounce text-3xl sm:hidden">
             &nbsp;🍋
           </span>
         </Link>
@@ -59,7 +57,7 @@ function FullCheckoutButton() {
     </>
   );
 }
-export function CustomerNavbar() {
+export function CustomerNavbar({ page }: { page?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   // const router = useRouter();
   // const isActive = (path: string) => router.pathname === path;
@@ -73,12 +71,20 @@ export function CustomerNavbar() {
             <div className="max-sm:hidden">
               <BrandHead />
             </div>
-            <div className="max-sm:hidden">
-              <CheckoutButton />
-            </div>
-            <div className="sm:hidden">
-              <FullCheckoutButton />
-            </div>
+
+            <Show when={page === "checkout"}>
+              <div className="sm:hidden">
+                <BrandHead />
+              </div>
+            </Show>
+            <Show when={page !== "checkout"}>
+              <div className="max-sm:hidden">
+                <CheckoutButton />
+              </div>
+              <div className="sm:hidden">
+                <FullCheckoutButton />
+              </div>
+            </Show>
           </div>
           <div className={/*`hidden md:block`*/ "hidden"}>
             {/* Other optional content like profile, etc. */}
@@ -115,7 +121,7 @@ export function CustomerNavbar() {
         <div className="md:hidden">
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
             <Link
-              href={LINKS.menu}
+              href={LINKS.adminMenu}
               className="block rounded-md px-3 py-2 text-base font-medium text-white"
             >
               Menu

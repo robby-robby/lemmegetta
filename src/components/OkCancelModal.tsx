@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { MutableRefObject, useEffect } from "react";
 
 import { useState } from "react";
-// import { BsCheckCircle } from "react-icons/bs";
-// import { FiAlertTriangle } from "react-icons/fi";
+import { BsCheckCircle } from "react-icons/bs";
+import { FiAlertTriangle } from "react-icons/fi";
 import { useButtonFocus } from "~/hooks/useFocus";
-// import { Spinner } from "~/components/Spinner";
-// import { TRPCStatus } from "../utils/TRPCStatus";
+import { Spinner } from "~/components/Spinner";
+import { TRPCStatus } from "../utils/TRPCStatus";
 
 export const ConfirmState = {
   open: true,
@@ -13,37 +13,48 @@ export const ConfirmState = {
 };
 export type ConfirmState = (typeof ConfirmState)[keyof typeof ConfirmState];
 
-export function useConfirmModal<T>(
-  okFn: (id?: T) => void,
-  openFn?: (id?: T) => void
-) {
-  const [id, setId] = useState<T>();
-  const [state, setState] = useState(ConfirmState.close);
-  const open = (id?: T) => {
-    if (openFn != null) {
-      setId(id);
-      openFn(id);
-    }
+// export type SaveStatusType = (typeof TRPCStatus)[keyof typeof TRPCStatus];
+
+export const useConfirmModal = <T,>(): {
+  open: (cf: T) => void;
+  close: () => void;
+  state: ConfirmState;
+  confirmFor: T;
+  setConfirmFor: (cf: T) => void;
+  message: string;
+  setMessage: (message: string) => void;
+  reset: () => void;
+  setState: (state: ConfirmState) => void;
+} => {
+  const [state, setState] = useState<ConfirmState>(false);
+  const [message, setMessage] = useState<string>("");
+  const [confirmFor, setConfirmFor] = useState<T>(null as unknown as T);
+  const reset = () => {
+    setMessage("");
+  };
+  const close = () => {
+    setState(ConfirmState.close);
+  };
+  const open = (cf: T) => {
+    setConfirmFor(cf);
     setState(ConfirmState.open);
   };
-  const handle = () => {
-    if (okFn != null) okFn(id);
-    setState(ConfirmState.close);
-  };
-  const escape = () => {
-    // console.log("!");
-    setState(ConfirmState.close);
-  };
+  useEffect(() => {
+    if (state == ConfirmState.close) reset();
+  }, [state]);
+
   return {
-    id,
-    setId,
-    setState,
-    state,
     open,
-    escape: escape,
-    handle,
+    close,
+    reset,
+    state,
+    message,
+    setMessage,
+    setState,
+    confirmFor,
+    setConfirmFor,
   };
-}
+};
 
 type Props = {
   state: ConfirmState;
@@ -53,13 +64,7 @@ type Props = {
   message?: string;
 };
 
-export const ConfirmModal: React.FC<Props> = ({
-  state,
-  ok,
-  close,
-  cancel,
-  message,
-}) => {
+export function OkCancelModal({ state, cancel, close, message, ok }: Props) {
   const [inputRef, setInputFocus] = useButtonFocus();
   useEffect(() => setInputFocus(), [setInputFocus]);
   return (
@@ -110,6 +115,7 @@ export const ConfirmModal: React.FC<Props> = ({
                     if (typeof cancel === "function") cancel();
                     if (typeof close === "function") close();
                   }}
+                  ref={inputRef}
                   className="mr-2 rounded bg-slate-400 px-4 py-2 font-bold text-white hover:bg-slate-500"
                 >
                   ❌ Cancel
@@ -120,7 +126,6 @@ export const ConfirmModal: React.FC<Props> = ({
                     if (typeof ok === "function") ok();
                     if (typeof close === "function") close();
                   }}
-                  ref={inputRef}
                   className="rounded bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-700"
                 >
                   Ok 👍
@@ -132,4 +137,23 @@ export const ConfirmModal: React.FC<Props> = ({
       </div>
     </div>
   );
-};
+}
+
+// export const OkCancelModal: React.FC<Props> = ({
+//   state,
+//   ok,
+//   close,
+//   cancel,
+//   message,
+// }) => {
+//   return (
+//     <RawOkCancelModal
+//       state={state}
+//       cancel={cancel}
+//       close={close}
+//       message={message}
+//       ok={ok}
+//       // inputRef={inputRef}
+//     />
+//   );
+// };

@@ -22,7 +22,7 @@ model MenuItems {
   price       Float //zod: required
   description String //zod: required
   shortCode   String   @unique //zod: required, max 4 characters 
-  imageUrl    String //zod: optional, default "https://placehold.co/400"
+  imageUrl    String   @default("https://placehold.co/400")
 }
 
 model Example {
