@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import Navbar from "~/components/Navbar";
+import { AdminNavbar } from "./AdminNavbar";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -8,7 +8,7 @@ type AdminLayoutProps = {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <>
-      <Navbar />
+      <AdminNavbar />
       <main>{children}</main>
     </>
   );

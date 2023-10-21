@@ -8,6 +8,7 @@ import { usePaymentCardsRPC } from "~/models/cards/usePaymentCardsRPC";
 import { isValidationFormatError } from "~/utils/misc";
 import { useVxFormatErrors } from "~/hooks/useVxErrors";
 import { type PaymentCardsType } from "~/models/cards";
+import { DumbLoadingText } from "../menu";
 
 export default function Payments() {
   const {
@@ -29,7 +30,8 @@ export default function Payments() {
   const handleSubmit = async () => {
     try {
       vxFormatErrorsReset();
-      saveModalLoading("...");
+      saveModalLoading(DumbLoadingText);
+
       await updateAsync(cards);
       saveModalSuccess("Payment settings updated");
     } catch (error) {

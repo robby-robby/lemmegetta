@@ -169,7 +169,9 @@ export const SaveModal: React.FC<Props> = ({
                 {status === TRPCStatus.loading ? "Loading 🌀" : null}
               </h3> */}
               {message ? (
-                <pre className="m-10 text-sm text-slate-500">{message}</pre>
+                <pre className="m-10 whitespace-break-spaces text-sm text-slate-500">
+                  {message}
+                </pre>
               ) : null}
               <button
                 data-modal-hide="popup-modal"

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400pt" height="400pt">
+  <defs>
+    <radialGradient xlink:href="#a" id="b" cx=".33703703" cy=".28358209" r=".38183698" fx=".33703703" fy=".28358209"/>
+    <linearGradient id="a">
+      <stop offset="0" stop-color="#ff0"/>
+      <stop offset="1" stop-color="#ffe300"/>
+    </linearGradient>
+  </defs>
+  <g fill-rule="evenodd">
+    <path fill="url(#b) #000" stroke="#000" stroke-linejoin="round" stroke-width="10" d="M68.708186 148.12939C228.69852 9.5810597 474.45687 146.15839 471.1581 289.65487c26.39016 25.56547-3.29877 53.60501-19.79262 61.02724-141.8471 174.8348-433.788226 31.33832-416.469684-112.98286-22.04877-63.37171-2.474078-82.14763 33.81239-89.56986z"/>
+    <path fill-opacity=".133333" d="M44.33033 267.99099c21.25-21.25 23.75 143.75 333.75 82.5-6.25-6.25-40-148.75 80-101.25 46.875 14.375-99.375-9.6875-47.5 90 8.044 13.09599 5.625 13.125 27.5 18.75-132.5 142.5-391.25 32.5-393.75-90z"/>
+    <path fill="#fff" fill-opacity=".7" d="M68.08033 155.83295c56.28929-65.34196 245.60535-111.855346 370 47.5-42.5 46.25-162.5-153.749992-370-47.5zm401.25 139.65804c14.31606 17.5 1.25 37.5-8.75 35-78.75-21.25-36.25-42.5 8.75-35z"/>
+  </g>
+  <rdf:RDF xmlns="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+</svg>

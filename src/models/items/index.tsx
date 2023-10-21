@@ -23,7 +23,7 @@ export const ItemSchemaValid = z.object({
   }),
   shortCode: z
     .string()
-    .max(8, "shortCode must be less than 8 characters")
+    .max(4, "shortCode must be less than 4 characters")
     .refine((data) => data !== "", {
       message: "shortCode is a required field",
     }),

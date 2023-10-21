@@ -110,7 +110,9 @@ export const ConfirmModal: React.FC<Props> = ({
             <div className="p-6 text-center">
               <div className="text-6xl">🔮</div>
               {message ? (
-                <pre className="m-5 text-sm text-slate-500">{message}</pre>
+                <pre className="m-5 whitespace-break-spaces text-sm text-slate-500">
+                  {message}
+                </pre>
               ) : null}
               <div className="flex justify-center">
                 <button

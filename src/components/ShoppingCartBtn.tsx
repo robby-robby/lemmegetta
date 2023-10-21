@@ -3,14 +3,12 @@ import { FaShoppingCart } from "react-icons/fa";
 
 const ShoppingCartButton = () => {
   return (
-    <div className="fixed right-4 top-4">
-      <button className="relative rounded-full bg-green-500 p-3 text-white shadow-lg focus:outline-none">
-        <FaShoppingCart size={24} />
-        <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-sm text-white">
-          3
-        </span>
-      </button>
-    </div>
+    <button className="relative rounded-full bg-green-500 p-3 text-white shadow-lg focus:outline-none">
+      <FaShoppingCart size={24} />
+      <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-sm text-white">
+        3
+      </span>
+    </button>
   );
 };
 

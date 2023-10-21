@@ -13,6 +13,7 @@ import { ConfirmModal, useConfirmModal } from "~/components/ConfirmModal";
 import { useVxErrors } from "~/hooks/useVxErrors";
 // import { isUniqueConstraintError } from "~/utils/uniqueConstraintErrors";
 
+export const DumbLoadingText = "..l.o.a.d.i.n.g..";
 function MenuPage() {
   const {
     // open: saveModalOpen,
@@ -66,7 +67,7 @@ function MenuPage() {
 
   const onSubmitCreate = async (item: ItemType) => {
     try {
-      saveModalLoading("...");
+      saveModalLoading(DumbLoadingText);
       await createAsync(item);
       saveModalSuccess("Item created");
       addClose();
@@ -83,7 +84,7 @@ function MenuPage() {
 
   const onSubmitRemove = async (itemId: ItemType["id"]) => {
     try {
-      saveModalLoading("...");
+      saveModalLoading(DumbLoadingText);
       await removeAsync(itemId);
       saveModalSuccess("Item removed");
     } catch (error) {
@@ -93,7 +94,7 @@ function MenuPage() {
 
   const onSubmitEdit = async (item: ItemType) => {
     try {
-      saveModalLoading("...");
+      saveModalLoading(DumbLoadingText);
       await updateAsync(item);
       saveModalSuccess("Item updated");
       editClose();
@@ -121,7 +122,6 @@ function MenuPage() {
 
   return (
     <>
-      {/* <ShoppingCartButton /> */}
       <ConfirmModal
         ok={() => onSubmitRemove(confirmModalFor)}
         close={confirmModalClose}
@@ -198,12 +198,12 @@ function ItemsGrid({
   }
   return (
     <>
-      <Item
+      {/* <Item
         key={NullItem.id}
         item={{ ...NullItem, imageUrl: "!" }}
         remove={remove}
         edit={edit}
-      />
+      /> */}
       {items.map((item) => (
         <Item key={item.id} item={item} remove={remove} edit={edit} />
       ))}
@@ -221,7 +221,7 @@ function Item({
   remove: (id: string) => void;
 }): ReactElement {
   return (
-    <div className="mb-4 w-full px-4 md:w-1/2 lg:w-1/4" key={item.id}>
+    <div className="mb-4 w-full px-4 md:w-1/2 lg:w-1/3" key={item.id}>
       <div className="rounded bg-white shadow-lg">
         <img
           className="h-64 w-full bg-gray-200 object-cover object-center"
