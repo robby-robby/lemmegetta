@@ -148,7 +148,7 @@ function MenuPage() {
                 Add 🏀
               </button>
             </div>
-            <div className="-mx-4 flex flex-wrap">
+            <div className="flex flex-wrap">
               <ItemsGrid
                 items={items}
                 edit={openEditItem}
@@ -198,12 +198,6 @@ function ItemsGrid({
   }
   return (
     <>
-      {/* <Item
-        key={NullItem.id}
-        item={{ ...NullItem, imageUrl: "!" }}
-        remove={remove}
-        edit={edit}
-      /> */}
       {items.map((item) => (
         <Item key={item.id} item={item} remove={remove} edit={edit} />
       ))}

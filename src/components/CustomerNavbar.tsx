@@ -6,10 +6,9 @@ import LemonWheelSvg from "~/components/LemonWheel.svg";
 import { BrandHead } from "~/components/BrandHead";
 import { useCart } from "~/hooks/useCart";
 import { Show } from "~/pages/menu/Show";
-
-const LINKS = {
-  menu: "/menu",
-};
+import Image from "next/image";
+import LemonSvg from "~/components/Lemon.svg";
+import { LINKS } from "./links";
 
 const Lemon = () => (
   <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">
@@ -38,11 +37,14 @@ function CheckoutButton({ className }: { className?: string }) {
         </div>
       </Show>
       <Show when={total > 0}>
-        <Link href={LINKS.menu} className={c}>
+        <Link href={LINKS.checkout} className={c}>
           {`${list.length} ${plural("item", list.length)} $${total.toFixed(
             2
           )} - `}
           Checkout
+          <span className="absolute right-7 top-6 block animate-bounce sm:hidden">
+            &nbsp;🍋
+          </span>
         </Link>
       </Show>
     </>
@@ -50,9 +52,11 @@ function CheckoutButton({ className }: { className?: string }) {
 }
 function FullCheckoutButton() {
   return (
-    <CheckoutButton
-      className={`text-md  block w-full rounded-md border-2 border-white px-3 py-2 text-center font-medium text-white`}
-    />
+    <>
+      <CheckoutButton
+        className={`text-md  block w-full rounded-md border-2 border-white px-3 py-2 text-center font-medium text-white`}
+      />
+    </>
   );
 }
 export function CustomerNavbar() {

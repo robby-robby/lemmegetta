@@ -1,5 +1,6 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { api } from "~/utils/api";
 

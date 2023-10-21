@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ItemSchema, ItemSchemaValid } from "~/models/items";
+import { ItemSchemaValid } from "~/models/items";
 import {
   createTRPCRouter,
   publicProcedure,

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import { type ItemType } from "~/models/items";
-import { SaveState, type SaveStatusType } from "~/components/SaveModal";
+import { type SaveStatusType } from "~/components/SaveModal";
 import { TRPCStatus } from "~/utils/TRPCStatus";
-// import { sta} from '@trpc/server';
-
 export type ItemsRPCAction = "create" | "update" | "delete";
 
 export function useItemsRPC(
@@ -13,8 +11,8 @@ export function useItemsRPC(
     action: ItemsRPCAction
   ) => void | ((status: SaveStatusType) => void)
 ) {
-  const [items, setItems] = useState<ItemType[]>([]);
   const itemsQuery = api.menuItems.getAll.useQuery();
+  const [items, setItems] = useState<ItemType[]>(itemsQuery.data ?? []);
   const itemsMuCreate = api.menuItems.create.useMutation();
   const itemsMuUpdate = api.menuItems.update.useMutation();
   const itemsMuDelete = api.menuItems.delete.useMutation();

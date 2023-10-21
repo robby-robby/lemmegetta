@@ -21,7 +21,7 @@ function MenuPage() {
           <div className="h-full w-full">
             <h1 className="text-thin mb-4 text-center text-3xl uppercase text-slate-800"></h1>
             {/* <div className="mb-3 flex justify-end"></div> */}
-            <div className="-mx-4 flex flex-wrap">
+            <div className="flex flex-wrap">
               <ItemsGrid items={items} />
             </div>
           </div>
@@ -49,12 +49,19 @@ function ItemsGrid({ items }: { items: ItemType[] }): ReactElement {
   );
 }
 
+const ifClass = (condition: boolean, className: string) =>
+  condition ? className : "";
 function Item({ item }: { item: ItemType }): ReactElement {
   const { add, del, count } = useCart(item.id);
 
   return (
     <div className="mb-4 w-full px-4 md:w-1/2 lg:w-1/3" key={item.id}>
-      <div className="rounded bg-white shadow-lg">
+      <div
+        className={`rounded ${ifClass(
+          count > 0,
+          "border-green-300"
+        )}  border-4 bg-white shadow-lg `}
+      >
         <img
           className="h-64 w-full bg-gray-200 object-cover object-center"
           src={item.imageUrl || "https://placehold.co/400"}
