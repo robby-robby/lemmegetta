@@ -48,7 +48,6 @@ export const paymentSettingsRouter = createTRPCRouter({
     .input(PaymentCardsSchemaValid)
     .mutation(async ({ input, ctx }) => {
       const serialized = serializeSettings(input);
-      await new Promise((rs) => setTimeout(rs, 20000));
       return ctx.prisma.$transaction(
         serialized.map((item) => {
           return ctx.prisma.paymentSettings.upsert({
