@@ -6,7 +6,7 @@ import { NullItem, type ItemType } from "~/models/items";
 import { useItemsRPC } from "~/models/items/useItemsRPC";
 import ShoppingCartButton from "~/components/ShoppingCartBtn";
 import { useCart } from "~/hooks/useCart";
-import { Show } from "./Show";
+import { Show } from "../../components/Show";
 import { PlusSign } from "~/components/PlusSign";
 import { MinusSign } from "~/components/MinusSign";
 import { ifClass } from "~/components/ifClass";

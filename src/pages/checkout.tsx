@@ -4,7 +4,7 @@ import Image from "next/image";
 import CustomerLayout from "~/components/CustomerLayout";
 import { useCart } from "~/hooks/useCart";
 import { useItemsRPC } from "~/models/items/useItemsRPC";
-import { Show } from "./menu/Show";
+import { Show } from "../components/Show";
 import { MinusSign } from "~/components/MinusSign";
 import { PlusSign } from "~/components/PlusSign";
 import { ifClass } from "~/components/ifClass";

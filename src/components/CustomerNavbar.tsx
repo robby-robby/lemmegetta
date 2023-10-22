@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { BrandHead } from "~/components/BrandHead";
 import { useCart } from "~/hooks/useCart";
-import { Show } from "~/pages/menu/Show";
+import { Show } from "~/components/Show";
 import { LINKS } from "./links";
 import { useItemsRPC } from "~/models/items/useItemsRPC";
 
